@@ -19,8 +19,10 @@
       expiry: Date.now() + life
     };
   };
+  var comment_update_last_time = -1;
   var comment_update_bullets = function () {
     var now = Date.now();
+    var delta = now - comment_update_last_time;
     comment_draw_ctx.clearRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
     comment_draw_ctx.font = '54px Lucida Grande';
     comment_draw_ctx.textBaseline = 'top';
@@ -32,7 +34,7 @@
     for (var i = 0; i < comment_onboard_bullets.length; ++i) {
       cur_bullet = comment_onboard_bullets[i];
       if (!cur_bullet) continue;
-      cur_bullet.x += cur_bullet.xspeed * 40;
+      cur_bullet.x += cur_bullet.xspeed * delta;
       if (now > cur_bullet.expiry) comment_onboard_bullets[i] = undefined;
       else {
         // Draw the bullet
@@ -40,8 +42,10 @@
         comment_draw_ctx.fillText(cur_bullet.message, cur_bullet.x, cur_bullet.y);
       }
     }
+    comment_update_last_time = now;
   };
   setInterval(comment_update_bullets, 40);
+  comment_update_last_time = Date.now();
 
   var comment_v_chunk_height = 5;
   var CommentBoardTopSlide = function (width, height) {
@@ -60,7 +64,7 @@
     var cmt_w = comment_draw_ctx.measureText(message).width;
     var cmt_h = 64;
     // Animations
-    var duration = Math.random() * 8000 + 3000;
+    var duration = Math.random() * 3000 + 8000;
     var speed = (this.width + cmt_w) / duration;
     // Allocate space
     var positioning_data = null;
