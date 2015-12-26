@@ -1,8 +1,47 @@
 (function (window) {
   console.log('Hello from Cuddly Telegram');
 
+  $('#comment-canvas')
+    .attr('width', document.documentElement.clientWidth)
+    .attr('height', document.documentElement.clientHeight);
+  var comment_draw_ctx = $('#comment-canvas')[0].getContext('2d');
+
   var comment_types = { TOP_SLIDE: 0, TOP_STICK: 1, BOTTOM_STICK: 2 };
   var comment_type_names = { 'top': 0, 'bottom': 2 }; // Workaround = =
+
+  var comment_onboard_bullets = [];
+  var comment_add_bullet = function (id, message, color, top, left, xspeed, life) {
+    var i;
+    for (i = 0; comment_onboard_bullets[i]; ++i);
+    comment_onboard_bullets[i] = {
+      id: id, message: message, color: color,
+      y: top, x: left, xspeed: xspeed,
+      expiry: Date.now() + life
+    };
+  };
+  var comment_update_bullets = function () {
+    var now = Date.now();
+    comment_draw_ctx.clearRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+    comment_draw_ctx.font = '54px Lucida Grande';
+    comment_draw_ctx.textBaseline = 'top';
+    comment_draw_ctx.shadowColor = '#666666';
+    comment_draw_ctx.shadowBlur = 0;  // 6;
+    comment_draw_ctx.shadowOffsetX = 2;
+    comment_draw_ctx.shadowOffsetY = 2;
+    var cur_bullet;
+    for (var i = 0; i < comment_onboard_bullets.length; ++i) {
+      cur_bullet = comment_onboard_bullets[i];
+      if (!cur_bullet) continue;
+      cur_bullet.x += cur_bullet.xspeed * 40;
+      if (now > cur_bullet.expiry) comment_onboard_bullets[i] = undefined;
+      else {
+        // Draw the bullet
+        comment_draw_ctx.fillStyle = cur_bullet.color;
+        comment_draw_ctx.fillText(cur_bullet.message, cur_bullet.x, cur_bullet.y);
+      }
+    }
+  };
+  setInterval(comment_update_bullets, 40);
 
   var comment_v_chunk_height = 5;
   var CommentBoardTopSlide = function (width, height) {
@@ -17,11 +56,12 @@
   };
   CommentBoardTopSlide.prototype.fire = function (id, message, color) {
     var now = Date.now();
-    // Create DOM element
+    // Calculate size
+    // TODO: Use measureText() instead.
     var bullet = $('<div>').addClass('bullet').html(message);
     $('body').append(bullet);
-    // Calculate size
     var cmt_w = bullet.width(), cmt_h = bullet.height();
+      bullet.remove();
     // Animations
     var duration = Math.random() * 8000 + 3000;
     var speed = (this.width + cmt_w) / duration;
@@ -50,14 +90,8 @@
         }
       }
     }
-    if (positioning_data === null) {
-      bullet.remove();
-      return false;
-    }
-    // Add DOM element to the page
-    bullet.css('left', this.width).css('top', positioning_data.top);
-    bullet.animate({left: -cmt_w}, duration, 'linear');
-    //setTimeout(function () { bullet.remove(); }, duration);
+    if (positioning_data === null) return false;
+    comment_add_bullet(id, message, color, positioning_data.top, this.width, -speed, duration);
     return true;
   };
 
