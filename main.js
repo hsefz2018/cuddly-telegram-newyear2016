@@ -102,8 +102,14 @@
     comment_board_topslide[i] = new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight);
   }
   var comment_board_fire = function (c) {
+    var i;
     if (comment_type_names[c.position] === comment_types.TOP_SLIDE) {
-      comment_board_topslide[0].fire(c.id, c.message, c.color);
+      for (i = 0; i < comment_board_topslide.length; ++i)
+        if (comment_board_topslide[i].fire(c.id, c.message, c.color)) break;
+      if (i === comment_board_topslide.length) {
+        comment_board_topslide.push(new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight));
+        comment_board_topslide[comment_board_topslide.length - 1].fire(c.id, c.message, c.color);
+      }
     }
   };
 
