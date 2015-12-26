@@ -98,7 +98,7 @@
     comment_board_topslide[i] = new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight);
   }
   var comment_board_fire = function (c) {
-    if (comment_type_names[c.type] === comment_types.TOP_SLIDE) {
+    if (comment_type_names[c.position] === comment_types.TOP_SLIDE) {
       comment_board_topslide[0].fire(c.id, c.message, c.color);
     }
   };
@@ -106,14 +106,16 @@
   //var socket = new WebSocket('<?php $channel = new SaeChannel();echo $channel -> createChannel('danmaku',18000);?>');
   // Workaround x2...
   // Workaround x3: http://stackoverflow.com/questions/17088609/disable-firefox-same-origin-policy/29096229#29096229
-  /*var xhr = new XMLHttpRequest();
+  var xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://app.efzer.org/live/2016newyear/danmaku.php', false);
   xhr.send();
   var socket = new WebSocket(xhr.response.substr(4299, 115));
   socket.onmessage = function (msg) {
     comment_board_fire(JSON.parse(msg.data));
+    //var c = JSON.parse(msg.data);
+    //comment_board_topslide[0].fire(c.id, c.message, c.color);
   };
-  window.___socket = socket;*/
+  window.___socket = socket;
   window.f = comment_board_fire;
   // f({id: 233, message: 'xaxx', type: 'top', color: '#c0c0ff'})
 }(window));
