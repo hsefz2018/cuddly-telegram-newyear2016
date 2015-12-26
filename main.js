@@ -1,10 +1,10 @@
 (function (window) {
   console.log('Hello from Cuddly Telegram');
 
-  $('#comment-canvas')
-    .attr('width', document.documentElement.clientWidth)
-    .attr('height', document.documentElement.clientHeight);
-  var comment_draw_ctx = $('#comment-canvas')[0].getContext('2d');
+  var comment_canvas = document.getElementById('comment-canvas');
+  comment_canvas.width = document.documentElement.clientWidth;
+  comment_canvas.height = document.documentElement.clientHeight;
+  var comment_draw_ctx = comment_canvas.getContext('2d');
 
   var comment_types = { TOP_SLIDE: 0, TOP_STICK: 1, BOTTOM_STICK: 2 };
   var comment_type_names = { 'top': 0, 'bottom': 2 }; // Workaround = =
@@ -56,12 +56,9 @@
   };
   CommentBoardTopSlide.prototype.fire = function (id, message, color) {
     var now = Date.now();
-    // Calculate size
-    // TODO: Use measureText() instead.
-    var bullet = $('<div>').addClass('bullet').html(message);
-    $('body').append(bullet);
-    var cmt_w = bullet.width(), cmt_h = bullet.height();
-      bullet.remove();
+    // Measure size
+    var cmt_w = comment_draw_ctx.measureText(message).width;
+    var cmt_h = 64;
     // Animations
     var duration = Math.random() * 8000 + 3000;
     var speed = (this.width + cmt_w) / duration;
