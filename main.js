@@ -95,21 +95,79 @@
     comment_add_bullet(id, message, color, positioning_data.top, this.width, -speed, duration);
     return true;
   };
+  var CommentBoardStick = function (width, height) {
+    this.width = width;
+    this.height = height;
+    this.next_clear = [];
+    for (var i = 0; i <= Math.ceil(height / comment_v_chunk_height); ++i) {
+      this.next_clear[i] = 0;
+    }
+  };
+  CommentBoardStick.prototype.fire = function (id, message, color) {
+    var now = Date.now();
+    // Measure size
+    var cmt_w = comment_draw_ctx.measureText(message).width;
+    var cmt_h = 64;
+    // Animations
+    var duration = Math.random() * 3000 + 5000;
+    // Allocate space
+    var positioning_data = null;
+    var unblock_time = now + duration;
+    var v_chunks = Math.ceil(cmt_h / comment_v_chunk_height);
+    for (var i = 0; i <= this.next_clear.length - v_chunks; ++i) {
+      if (this.next_clear[i] <= now) {
+        var j, valid = true;
+        for (j = i; j < i + v_chunks; ++j)
+          if (this.next_clear[i] > now) {
+            valid = false; break;
+          }
+        if (valid) {
+          for (j = i; j < i + v_chunks; ++j) {
+            this.next_clear[j] = unblock_time;
+          }
+          positioning_data = {line_num: i};
+          break;
+        } else {
+          i = j;
+        }
+      }
+    }
+    if (positioning_data === null) return false;
+    comment_add_bullet(id, message, color,
+      this.y_for_line(positioning_data.line_num, cmt_h), (this.width - cmt_w) / 2, 0, duration);
+    return true;
+  };
+  CommentBoardStick.prototype.y_for_line = function (num, cmt_h) { return 0; }; // Override me
+  var CommentBoardTopStick = CommentBoardStick;
+  CommentBoardTopStick.prototype.y_for_line = function (num) { return comment_v_chunk_height * num; };
+  var CommentBoardBottomStick = CommentBoardStick;
+  CommentBoardBottomStick.prototype.y_for_line = function (num, cmt_h) {
+    return document.documentElement.clientHeight - comment_v_chunk_height * num - cmt_h;
+  };
 
   var comment_board_cnt = 4;
   var comment_board_topslide = [];
+  var comment_board_bottomstick = [];
   for (var i = 0; i < comment_board_cnt; ++i) {
     comment_board_topslide[i] = new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight);
   }
   var comment_board_fire = function (c) {
     var i;
+    var board_array, board_type;
+    // Decide type of the comment
     if (comment_type_names[c.position] === comment_types.TOP_SLIDE) {
-      for (i = 0; i < comment_board_topslide.length; ++i)
-        if (comment_board_topslide[i].fire(c.id, c.message, c.color)) break;
-      if (i === comment_board_topslide.length) {
-        comment_board_topslide.push(new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight));
-        comment_board_topslide[comment_board_topslide.length - 1].fire(c.id, c.message, c.color);
-      }
+      board_array = comment_board_topslide;
+      board_type = CommentBoardTopSlide;
+    } else if (comment_type_names[c.position] === comment_types.BOTTOM_STICK) {
+      board_array = comment_board_bottomstick;
+      board_type = CommentBoardBottomStick;
+    }
+    // Fire ☆*:.｡. o(≧▽≦)o .｡.:*☆
+    for (i = 0; i < board_array.length; ++i)
+      if (board_array[i].fire(c.id, c.message, c.color)) break;
+    if (i === board_array.length) {
+      board_array.push(new board_type(document.documentElement.clientWidth, document.documentElement.clientHeight));
+      board_array[board_array.length - 1].fire(c.id, c.message, c.color);
     }
   };
 
