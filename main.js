@@ -1,9 +1,11 @@
 (function (window) {
   console.log('Hello from Cuddly Telegram');
+  var window_w = window.innerWidth;
+  var window_h = window.innerHeight;
 
   var comment_canvas = document.getElementById('comment-canvas');
-  comment_canvas.width = document.documentElement.clientWidth;
-  comment_canvas.height = document.documentElement.clientHeight;
+  comment_canvas.width = window_w;
+  comment_canvas.height = window_h;
   var comment_draw_ctx = comment_canvas.getContext('2d');
 
   var comment_types = { TOP_SLIDE: 0, TOP_STICK: 1, BOTTOM_STICK: 2 };
@@ -23,7 +25,7 @@
   var comment_update_bullets = function () {
     var now = Date.now();
     var delta = now - comment_update_last_time;
-    comment_draw_ctx.clearRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+    comment_draw_ctx.clearRect(0, 0, window_w, window_h);
     comment_draw_ctx.font = '54px Lucida Grande';
     comment_draw_ctx.textBaseline = 'top';
     comment_draw_ctx.shadowColor = '#666666';
@@ -139,17 +141,17 @@
   };
   CommentBoardStick.prototype.y_for_line = function (num, cmt_h) { return 0; }; // Override me
   var CommentBoardTopStick = CommentBoardStick;
-  CommentBoardTopStick.prototype.y_for_line = function (num) { return comment_v_chunk_height * num; };
+  CommentBoardTopStick.prototype.y_for_line = function (num, cmt_h) { return comment_v_chunk_height * num; };
   var CommentBoardBottomStick = CommentBoardStick;
   CommentBoardBottomStick.prototype.y_for_line = function (num, cmt_h) {
-    return document.documentElement.clientHeight - comment_v_chunk_height * num - cmt_h;
+    return window_h - comment_v_chunk_height * num - cmt_h;
   };
 
   var comment_board_cnt = 4;
   var comment_board_topslide = [];
   var comment_board_bottomstick = [];
   for (var i = 0; i < comment_board_cnt; ++i) {
-    comment_board_topslide[i] = new CommentBoardTopSlide(document.documentElement.clientWidth, document.documentElement.clientHeight);
+    comment_board_topslide[i] = new CommentBoardTopSlide(window_w, window_h);
   }
   var comment_board_fire = function (c) {
     var i;
@@ -166,7 +168,7 @@
     for (i = 0; i < board_array.length; ++i)
       if (board_array[i].fire(c.id, c.message, c.color)) break;
     if (i === board_array.length) {
-      board_array.push(new board_type(document.documentElement.clientWidth, document.documentElement.clientHeight));
+      board_array.push(new board_type(window_w, window_h));
       board_array[board_array.length - 1].fire(c.id, c.message, c.color);
     }
   };
@@ -183,7 +185,5 @@
     //var c = JSON.parse(msg.data);
     //comment_board_topslide[0].fire(c.id, c.message, c.color);
   };
-  window.___socket = socket;
-  window.f = comment_board_fire;
   // f({id: 233, message: 'xaxx', type: 'top', color: '#c0c0ff'})
 }(window));
