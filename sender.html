@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>弹幕后台 · 仅供测试使用（大雾</title>
+    <style>
+      body { font-size: 40px; }
+      #container { width: 100%; }
+      input, button {
+        font-size: 40px;
+        padding: 0.1em;
+        margin: 0.2em;
+        width: 80%;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        border: 2px #ddd solid;
+        border-radius: 4px;
+      }
+      input:focus { border-color: #999; }
+      button { background-color: #eee; }
+      button:focus, button:active { background-color: #aaa; }
+    </style>
+  </head>
+  <body>
+    <div id='container'>
+      <input id='msg-text' type='text' placeholder='Message'><br>
+      <input id='color-text' type='text' placeholder='Colour'><br>
+      <input id='pos-text' type='text' placeholder='Position'><br>
+      <button id='submit-btn'>♪───Ｏ（≧∇≦）Ｏ────♪</button>
+      <button id='rand-btn'>ˊ_>ˋ</button>
+    </div>
+    <script>
+      var hey = function (s) {
+        var r = '';
+        for (var i = 0; i < s.length; ++i) r += '%26%23'+s.charCodeAt(i).toString()+'%3B';
+        return r;
+      };
+      document.getElementById('msg-text').onkeypress =
+      document.getElementById('pos-text').onkeypress =
+      document.getElementById('color-text').onkeypress = function (e) {
+        if (e.keyCode == 13) document.getElementById('submit-btn').click();
+      };
+      var update_colour_disp = function () {
+        document.getElementById('color-text').style.backgroundColor
+          = document.getElementById('color-text').value;
+      };
+      document.getElementById('color-text').onkeyup =
+      document.getElementById('color-text').onchange = update_colour_disp;
+      document.getElementById('submit-btn').onclick = function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://app.efzer.org/live/2016newyear/send.php');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('Message=' + hey(document.getElementById('msg-text').value) +
+          '&Color=' + document.getElementById('color-text').value +
+          '&Position=' + document.getElementById('pos-text').value);
+      };
+      document.getElementById('rand-btn').onclick = function () {
+        var colour_code = Math.floor(Math.random() * 256 * 256 * 256);
+        var s = colour_code.toString(16);
+        while (s.length < 6) s = '0' + s;
+        document.getElementById('color-text').value = '#' + s;
+        update_colour_disp();
+      };
+    </script>
+  </body>
+</html>
