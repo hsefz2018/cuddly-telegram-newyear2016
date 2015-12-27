@@ -3,6 +3,12 @@
   var window_w = window.innerWidth;
   var window_h = window.innerHeight;
 
+  var html_decode_helper = document.createElement('span');
+  var html_decode = function (s) {
+    html_decode_helper.innerHTML = s;
+    return html_decode_helper.innerText;
+  };
+
   var comment_canvas = document.getElementById('comment-canvas');
   comment_canvas.width = window_w;
   comment_canvas.height = window_h;
@@ -165,6 +171,7 @@
       board_type = CommentBoardBottomStick;
     }
     // Fire ☆*:.｡. o(≧▽≦)o .｡.:*☆
+    c.message = html_decode(c.message);
     for (i = 0; i < board_array.length; ++i)
       if (board_array[i].fire(c.id, c.message, c.color)) break;
     if (i === board_array.length) {
