@@ -52,7 +52,7 @@
     }
     comment_update_last_time = now;
   };
-  setInterval(comment_update_bullets, 40);
+  setInterval(comment_update_bullets, 25);
   comment_update_last_time = Date.now();
 
   var comment_v_chunk_height = 5;
