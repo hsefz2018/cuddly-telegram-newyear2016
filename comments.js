@@ -12,17 +12,18 @@
   var comment_types = { TOP_SLIDE: 0, TOP_STICK: 1, BOTTOM_STICK: 2 };
 
   var comment_onboard_bullets = [];
-  var comment_add_bullet = function (id, message, color, top, left, xspeed, life) {
+  var comment_add_bullet = function (id, message, color, top, left, width, height, xspeed, life) {
     var i;
     for (i = 0; comment_onboard_bullets[i]; ++i);
     comment_onboard_bullets[i] = {
       id: id, message: message, color: color,
-      y: top, x: left, xspeed: xspeed,
+      y: top, x: left, w: width, h: height, xspeed: xspeed,
       life: life
     };
   };
   var comment_update_last_time = -1;
   var comment_is_paused = false;
+  var comment_highlighted_idx = -1;
   var comment_update_bullets = function () {
     var now = Date.now();
     var delta = now - comment_update_last_time;
@@ -47,11 +48,37 @@
       // Draw the bullet
       comment_draw_ctx.fillStyle = cur_bullet.color;
       comment_draw_ctx.fillText(cur_bullet.message, cur_bullet.x, cur_bullet.y);
+      // Highlight if set
+      if (i === comment_highlighted_idx) {
+        comment_draw_ctx.strokeStyle = 'white';
+        comment_draw_ctx.strokeRect(cur_bullet.x, cur_bullet.y, cur_bullet.w, cur_bullet.h);
+      }
     }
     comment_update_last_time = now;
   };
   setInterval(comment_update_bullets, 25);
   comment_update_last_time = Date.now();
+
+  // For selecting comments with mouse
+  commenting.comment_at_pos = function (x, y) {
+    var i, cur_bullet;
+    for (i = 0; i < comment_onboard_bullets.length; ++i) {
+      if ((cur_bullet = comment_onboard_bullets[i])
+        && cur_bullet.x <= x && cur_bullet.x + cur_bullet.w >= x
+        && cur_bullet.y <= y && cur_bullet.y + cur_bullet.h >= y) return i;
+    }
+    return -1;
+  };
+  commenting.highlight_comment = function (idx_or_x, y) {
+    if (y != null) comment_highlighted_idx = commenting.comment_at_pos(idx_or_x, y);
+    else comment_highlighted_idx = idx_or_x;
+  };
+  // Removes highlighted comment or comment with given index
+  commenting.remove_comment = function (idx) {
+    if (idx == null) { idx = comment_highlighted_idx; comment_highlighted_idx = -1; }
+    if (idx >= 0 && idx < comment_onboard_bullets.length)
+      comment_onboard_bullets[idx] = undefined;
+  };
 
   var comment_v_chunk_height = 5;
   var CommentBoardTopSlide = function (width, height) {
@@ -98,7 +125,7 @@
       }
     }
     if (positioning_data === null) return false;
-    comment_add_bullet(id, message, color, positioning_data.top, this.width, -speed, duration);
+    comment_add_bullet(id, message, color, positioning_data.top, this.width, cmt_w, cmt_h, -speed, duration);
     return true;
   };
   var CommentBoardStick = function (width, height) {
@@ -140,7 +167,7 @@
     }
     if (positioning_data === null) return false;
     comment_add_bullet(id, message, color,
-      this.y_for_line(positioning_data.line_num, cmt_h), (this.width - cmt_w) / 2, 0, duration);
+      this.y_for_line(positioning_data.line_num, cmt_h), (this.width - cmt_w) / 2, cmt_w, cmt_h, 0, duration);
     return true;
   };
   CommentBoardStick.prototype.y_for_line = function (num, cmt_h) { return 0; }; // Override me
