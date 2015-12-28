@@ -1,6 +1,6 @@
 (function (window) {
   console.log('Hello from Cuddly Telegram');
-  var commenting = {};
+  var commenting = { font: '54px Lucida Grande', text_height: 64, expiry_callback: undefined };
   var window_w = window.innerWidth;
   var window_h = window.innerHeight;
 
@@ -28,7 +28,7 @@
     var now = Date.now();
     var delta = now - comment_update_last_time;
     comment_draw_ctx.clearRect(0, 0, window_w, window_h);
-    comment_draw_ctx.font = '54px Lucida Grande';
+    comment_draw_ctx.font = commenting.font;
     comment_draw_ctx.textBaseline = 'top';
     comment_draw_ctx.shadowColor = '#666666';
     comment_draw_ctx.shadowBlur = 0;  // 6;
@@ -96,7 +96,7 @@
     var now = Date.now();
     // Measure size
     var cmt_w = comment_draw_ctx.measureText(message).width;
-    var cmt_h = 64;
+    var cmt_h = commenting.text_height;
     // Animations
     var duration = Math.random() * 3000 + 8000;
     var speed = (this.width + cmt_w) / duration;
@@ -141,7 +141,7 @@
     var now = Date.now();
     // Measure size
     var cmt_w = comment_draw_ctx.measureText(message).width;
-    var cmt_h = 64;
+    var cmt_h = commenting.text_height;
     // Animations
     var duration = Math.random() * 3000 + 5000;
     // Allocate space

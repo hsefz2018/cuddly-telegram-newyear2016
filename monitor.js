@@ -14,6 +14,8 @@
     if (e.keyCode == 32) window.commenting.toggle_pause();
   };
 
+  commenting.font = '44px Lucida Grande';
+  commenting.text_height = 48;
   document.getElementById('comment-canvas').onmousemove = function (e) {
     // console.log(e.clientX + ' ' + e.clientY);
     commenting.highlight_comment(e.clientX, e.clientY);
