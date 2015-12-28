@@ -1,5 +1,6 @@
 (function (window) {
   console.log('Hello from Cuddly Telegram');
+  var commenting = {};
   var window_w = window.innerWidth;
   var window_h = window.innerHeight;
 
@@ -17,10 +18,11 @@
     comment_onboard_bullets[i] = {
       id: id, message: message, color: color,
       y: top, x: left, xspeed: xspeed,
-      expiry: Date.now() + life
+      life: life
     };
   };
   var comment_update_last_time = -1;
+  var comment_is_paused = false;
   var comment_update_bullets = function () {
     var now = Date.now();
     var delta = now - comment_update_last_time;
@@ -35,13 +37,16 @@
     for (var i = 0; i < comment_onboard_bullets.length; ++i) {
       cur_bullet = comment_onboard_bullets[i];
       if (!cur_bullet) continue;
-      cur_bullet.x += cur_bullet.xspeed * delta;
-      if (now > cur_bullet.expiry) comment_onboard_bullets[i] = undefined;
-      else {
-        // Draw the bullet
-        comment_draw_ctx.fillStyle = cur_bullet.color;
-        comment_draw_ctx.fillText(cur_bullet.message, cur_bullet.x, cur_bullet.y);
+      if (!comment_is_paused) {
+        cur_bullet.x += cur_bullet.xspeed * delta;
+        if ((cur_bullet.life -= delta) <= 0) {
+          comment_onboard_bullets[i] = undefined;
+          continue;
+        }
       }
+      // Draw the bullet
+      comment_draw_ctx.fillStyle = cur_bullet.color;
+      comment_draw_ctx.fillText(cur_bullet.message, cur_bullet.x, cur_bullet.y);
     }
     comment_update_last_time = now;
   };
@@ -152,7 +157,7 @@
   for (var i = 0; i < comment_board_cnt; ++i) {
     comment_board_topslide[i] = new CommentBoardTopSlide(window_w, window_h);
   }
-  var comment_board_fire = function (c) {
+  commenting.fire = function (c) {
     var i;
     var board_array, board_type;
     // Decide type of the comment
@@ -171,11 +176,17 @@
       board_array[board_array.length - 1].fire(c.id, c.message, c.color);
     }
   };
-
-  window.commenting = {
-    width: window_w,  // Constant
-    height: window_h, // Constant
-    type: comment_types,
-    fire: comment_board_fire
+  commenting.pause = function () {
+    comment_is_paused = true;
   };
+  commenting.resume = function () {
+    comment_is_paused = false;
+    // comment_update_last_time = Date.now();
+  };
+  commenting.toggle_pause = function () {
+    comment_is_paused = !comment_is_paused;
+  };
+
+  window.commenting = commenting;
+  window.commenting.type = comment_types;
 }(window));

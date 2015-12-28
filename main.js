@@ -10,6 +10,10 @@
     return html_decode_helper.innerText;
   };
 
+  document.onkeydown = function (e) {
+    if (e.keyCode == 32) window.commenting.toggle_pause();
+  };
+
   //var socket = new WebSocket('<?php $channel = new SaeChannel();echo $channel -> createChannel('danmaku',18000);?>');
   var xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://app.efzer.org/live/2016newyear/danmaku.php', false);
