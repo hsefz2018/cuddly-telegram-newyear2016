@@ -186,7 +186,7 @@
   var xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://app.efzer.org/live/2016newyear/danmaku.php', false);
   xhr.send();
-  var socket = new WebSocket(xhr.response.substr(xhr.response.indexOf('ws://', 115));
+  var socket = new WebSocket(xhr.response.substr(xhr.response.indexOf('ws://', 115)));
   socket.onmessage = function (msg) {
     comment_board_fire(JSON.parse(msg.data));
     //var c = JSON.parse(msg.data);
