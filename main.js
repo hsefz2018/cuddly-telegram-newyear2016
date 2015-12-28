@@ -192,5 +192,6 @@
     //var c = JSON.parse(msg.data);
     //comment_board_topslide[0].fire(c.id, c.message, c.color);
   };
-  // f({id: 233, message: 'xaxx', type: 'top', color: '#c0c0ff'})
+  // window.f = comment_board_fire;
+  // f({id: 233, message: 'xaxx', position: 'top', color: '#c0c0ff'})
 }(window));
