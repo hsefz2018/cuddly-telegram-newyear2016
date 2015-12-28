@@ -160,6 +160,7 @@
     comment_board_topslide[i] = new CommentBoardTopSlide(window_w, window_h);
   }
   var comment_board_fire = function (c) {
+    if (c.color == 'blue' || c.color == '#00f' || c.color == '#0000ff') c.color = '#66f';
     var i;
     var board_array, board_type;
     // Decide type of the comment
