@@ -41,6 +41,7 @@
       if (!comment_is_paused) {
         cur_bullet.x += cur_bullet.xspeed * delta;
         if ((cur_bullet.life -= delta) <= 0) {
+          if (commenting.expiry_callback) commenting.expiry_callback(cur_bullet);
           comment_onboard_bullets[i] = undefined;
           continue;
         }

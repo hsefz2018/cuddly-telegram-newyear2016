@@ -21,6 +21,9 @@
   document.getElementById('comment-canvas').onmouseup = function (e) {
     commenting.remove_comment();
   };
+  commenting.expiry_callback = function (cmt) {
+    console.log(cmt);
+  };
   var random_colour = function () {
     var colour_code = Math.floor(Math.random() * 256 * 256 * 256);
     var s = colour_code.toString(16);
@@ -28,6 +31,7 @@
     return '#' + s;
   };
   setInterval(function () {
-    window.commenting.fire({id: Math.floor(Math.random() * 0xffffff), message: 'xxxxxx', position: 0, color: random_colour()})
+    window.commenting.fire({id: Math.floor(Math.random() * 0xffffff),
+    message: (Math.random() < 0.95 ? 'xxxxxx' : 'aaaaaa'), position: 0, color: random_colour()})
   }, 300);
 }(window));
