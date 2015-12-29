@@ -38,5 +38,4 @@
     // window.commenting.fire({id: 1, message: 'xxx', position: 0, color: 'red'})
   };
   reconnect();
-  setInterval(reconnect, 300000);
 }(window));
