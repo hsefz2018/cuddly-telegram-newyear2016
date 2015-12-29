@@ -17,13 +17,12 @@
   commenting.font = '60px Lucida Grande';
   commenting.text_height = 66;
   //var socket = new WebSocket('<?php $channel = new SaeChannel();echo $channel -> createChannel('danmaku',18000);?>');
-  window.c_socket = null;
   var reconnect = function () {
     if (window.c_socket) window.c_socket.close();
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://app.efzer.org/live/2016newyear/danmaku.php', false);
     xhr.send();
-    window.c_socket = new WebSocket(xhr.response.substr(xhr.response.indexOf('ws://'), 115));
+    var socket = new WebSocket(xhr.response.substr(xhr.response.indexOf('ws://'), 115));
     window.last_received_id = -1;
     window.c_socket.onmessage = function (msg) {
       var c = JSON.parse(msg.data);
@@ -35,6 +34,7 @@
       window.commenting.fire(c);
       setTimeout((function (_c) { return function () { window.commenting.fire(_c); }; })(c), 15000);
     };
+    socket.onclose = reconnect;
     // window.commenting.fire({id: 1, message: 'xxx', position: 0, color: 'red'})
   };
   reconnect();
