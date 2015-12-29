@@ -14,6 +14,8 @@
     if (e.keyCode == 32) window.commenting.toggle_pause();
   };
 
+  commenting.font = '60px Lucida Grande';
+  commenting.text_height = 66;
   //var socket = new WebSocket('<?php $channel = new SaeChannel();echo $channel -> createChannel('danmaku',18000);?>');
   window.c_socket = null;
   var reconnect = function () {
