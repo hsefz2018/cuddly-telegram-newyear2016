@@ -36,4 +36,6 @@
     window.commenting.fire({id: Math.floor(Math.random() * 0xffffff),
     message: (Math.random() < 0.95 ? 'xxxxxx' : 'aaaaaa'), position: 0, color: random_colour()})
   }, 300);
+
+  var xhr = new XMLHttpRequest();
 }(window));
