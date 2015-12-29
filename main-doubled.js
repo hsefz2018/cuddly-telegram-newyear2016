@@ -24,7 +24,7 @@
     xhr.send();
     var socket = new WebSocket(xhr.response.substr(xhr.response.indexOf('ws://'), 115));
     window.last_received_id = -1;
-    window.c_socket.onmessage = function (msg) {
+    socket.onmessage = function (msg) {
       var c = JSON.parse(msg.data);
       if (c.id == window.last_received_id) return;
       window.last_received_id = c.id;
