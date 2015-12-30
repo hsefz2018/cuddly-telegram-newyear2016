@@ -50,10 +50,12 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://app.efzer.org/live/2016newyear/send.php');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send('message=' + hey(document.getElementById('msg-text').value) +
+        var args = 'message=' + hey(document.getElementById('msg-text').value) +
           '&color=' + document.getElementById('color-text').value +
           '&position=' + document.getElementById('pos-text').value +
-          '&pwd=StrongerPumpkin');
+          '&pwd=StrongerPumpkin';
+        xhr.send(args);
+        console.log(args);
       };
       document.getElementById('rand-btn').onclick = function () {
         var colour_code = Math.floor(Math.random() * 256 * 256 * 256);
