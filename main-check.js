@@ -17,7 +17,6 @@
   commenting.font = '48px Lucida Grande';
   commenting.text_height = 54;
   //var socket = new WebSocket('<?php $channel = new SaeChannel();echo $channel -> createChannel('danmaku',18000);?>');
-  window.last_text = '';
   var reconnect = function () {
     if (window.c_socket) window.c_socket.close();
     var xhr = new XMLHttpRequest();
@@ -27,15 +26,15 @@
     window.last_received_id = -1;
     socket.onmessage = function (msg) {
       var c = JSON.parse(msg.data);
+      if (c.id == window.last_received_id) return;
+      window.last_received_id = c.id;
       if (c.color == 'blue' || c.color == '#00f' || c.color == '#0000ff') c.color = '#66f';
       c.position = comment_type_names[c.position];
       c.message = html_decode(c.message);
-      if (c.message == window.last_text) return;
-      window.last_text = c.message;
       if (c.message.substr(0, 8) === '#opacity') {
         document.getElementById('comment-canvas').style.opacity = c.message.substr(8); 
       } else {
-        window.commenting.fire(c);
+        console.log(c);
       }
       //setTimeout((function (_c) { return function () { window.commenting.fire(_c); }; })(c), 15000);
     };
