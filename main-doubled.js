@@ -31,7 +31,11 @@
       if (c.color == 'blue' || c.color == '#00f' || c.color == '#0000ff') c.color = '#66f';
       c.position = comment_type_names[c.position];
       c.message = html_decode(c.message);
-      window.commenting.fire(c);
+      if (c.message.substr(0, 8) === '#opacity') {
+        document.getElementById('comment-canvas').style.opacity = c.message.substr(8); 
+      } else {
+        window.commenting.fire(c);
+      }
       //setTimeout((function (_c) { return function () { window.commenting.fire(_c); }; })(c), 15000);
     };
     socket.onclose = reconnect;
