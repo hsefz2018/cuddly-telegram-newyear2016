@@ -3,6 +3,8 @@
   var commenting = { font: '54px Lucida Grande', text_height: 64, expiry_callback: undefined };
   var window_w = window.innerWidth;
   var window_h = window.innerHeight;
+  var padding_top = 20;
+  var padding_bottom = 30;
 
   var comment_canvas = document.getElementById('comment-canvas');
   comment_canvas.width = window_w;
@@ -118,7 +120,7 @@
             this.next_unblock[j] = unblock_time;
             this.next_clear[j] = fully_out_time;
           }
-          positioning_data = {top: comment_v_chunk_height * i, speed: speed};
+          positioning_data = {top: comment_v_chunk_height * i + padding_top, speed: speed};
           break;
         } else {
           i = j;
@@ -173,10 +175,10 @@
   };
   CommentBoardStick.prototype.y_for_line = function (num, cmt_h) { return 0; }; // Override me
   var CommentBoardTopStick = CommentBoardStick;
-  CommentBoardTopStick.prototype.y_for_line = function (num, cmt_h) { return comment_v_chunk_height * num; };
+  CommentBoardTopStick.prototype.y_for_line = function (num, cmt_h) { return comment_v_chunk_height * num + padding_top; };
   var CommentBoardBottomStick = CommentBoardStick;
   CommentBoardBottomStick.prototype.y_for_line = function (num, cmt_h) {
-    return window_h - comment_v_chunk_height * num - cmt_h;
+    return window_h - comment_v_chunk_height * num - cmt_h - padding_bottom;
   };
 
   var comment_board_cnt = 4;
