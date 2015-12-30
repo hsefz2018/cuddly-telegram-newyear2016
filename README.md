@@ -1,6 +1,6 @@
 # cuddly-telegram-newyear2016
 
-HSEFZ 2016元旦文艺汇演弹幕屏（替补 = =）
+HSEFZ 2016元旦文艺汇演弹幕屏
 
 在 Firefox 下工作正常，调试用全局 CORS 插件：[cors everywhere](https://addons.mozilla.org/zh-CN/firefox/addon/cors-everywhere/)  
 其他浏览器暂未测试
