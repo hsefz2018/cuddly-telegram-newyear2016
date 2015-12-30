@@ -32,7 +32,7 @@
       c.position = comment_type_names[c.position];
       c.message = html_decode(c.message);
       window.commenting.fire(c);
-      setTimeout((function (_c) { return function () { window.commenting.fire(_c); }; })(c), 15000);
+      //setTimeout((function (_c) { return function () { window.commenting.fire(_c); }; })(c), 15000);
     };
     socket.onclose = reconnect;
     // window.commenting.fire({id: 1, message: 'xxx', position: 0, color: 'red'})
