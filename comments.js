@@ -5,6 +5,7 @@
   var window_h = window.innerHeight;
   var padding_top = 20;
   var padding_bottom = 30;
+  var height_limit = window_h;//190;
 
   var comment_canvas = document.getElementById('comment-canvas');
   comment_canvas.width = window_w;
@@ -89,7 +90,7 @@
     this.height = height;
     this.next_unblock = [];
     this.next_clear = [];
-    for (var i = 0; i <= Math.ceil(height / comment_v_chunk_height); ++i) {
+    for (var i = 0; i <= Math.ceil(height_limit / comment_v_chunk_height); ++i) {
       this.next_unblock[i] = 0;
       this.next_clear[i] = 0;
     }
@@ -135,7 +136,7 @@
     this.width = width;
     this.height = height;
     this.next_clear = [];
-    for (var i = 0; i <= Math.ceil(height / comment_v_chunk_height); ++i) {
+    for (var i = 0; i <= Math.ceil(height_limit / comment_v_chunk_height); ++i) {
       this.next_clear[i] = 0;
     }
   };
