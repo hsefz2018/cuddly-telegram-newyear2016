@@ -1,4 +1,6 @@
 var fs = require('fs');
+var process = require('process');
+var readline = require('readline').createInterface({ input: process.stdin });
 
 var account_names = {'学生电视台': 0, '校友联络会': 1};
 var result_names = {'由审核员批准': 0, '由审核员拒绝': 1, '系统自动批准': 2, '系统自动拒绝': 3, '人工审核中': 4, '未审核': 5};
@@ -30,4 +32,8 @@ for (var i = 0; i < a.length; ++i) {
   a[i].check_time = date_parse(a[i].check_time);
 }
 
-console.log(a.slice(2333, 2343));
+console.log('Data loaded. Now enter expressions to evaluate.\n');
+
+readline.on('line', function (expr) {
+  console.log(eval(expr));
+});
