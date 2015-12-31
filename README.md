@@ -43,3 +43,8 @@ TODO
 ========
 
 GitHub 创建新项目时的自动提示
+
+许可证
+======
+
+[The MIT/Expat License](LICENSE)
