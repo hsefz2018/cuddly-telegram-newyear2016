@@ -66,8 +66,16 @@ programmes = [
   [206, 13, '* 校友新年祝福视频四（SJTU）'],
   [212, 42, '街舞社 舞蹈 Bang Bang Bang'],
   [217, 45, '高三全体 合唱 爱因为在心中'],
-  [223, 36, '高一(6) 歌曲 & 团学联集体谢幕舞蹈'],
+  [223, 36, '高一(6) 歌曲 & 团学联集体谢幕舞蹈 High School Musical'],
   [229, 53, '* 谢幕后']
 ];
 replay_offset = 2134
 programmes = programmes.map(function (e) { return { start: e[0] * 60 + e[1] - replay_offset, name: e[2] }; })
+
+prog_cnt = a.reduce(function (r, e) { var m = 0; while (m < programmes.length && programmes[m].start < e.send_time) ++m; --m; if (m >= 0) r[m] = r[m] ? (r[m] + 1) : 1; return r; }, {})
+prog_cnt_by_name = {}
+for (var i in prog_cnt) prog_cnt_by_name[programmes[i].name] = prog_cnt[i];
+prog_cnt_by_name
+for (var i in prog_cnt) { i = parseInt(i); prog_cnt_by_name[programmes[i].name] /= ((programmes[i + 1] ? programmes[i + 1].start : (14081 - replay_offset)) - programmes[i].start); }
+prog_cnt_by_name  // 弹幕密度
+count_user(prog_cnt_by_name, true)
