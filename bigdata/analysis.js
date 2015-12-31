@@ -30,5 +30,5 @@ for (var i = 0; i < a.length; ++i) {
   a[i].check_time = date_parse(a[i].check_time);
 }
 
-console.log(a.slice(2333, 2343));
+console.log(a.slice(657, 666));
 GLOBAL.a = a;
