@@ -96,3 +96,19 @@ for (var i = 0; i < a.length; ++i) {
 single_char = count_user(single_char, true)
 for (var i in single_char) single_char[i] = single_char[i].join('');
 single_char
+
+// 双音节词
+function count_words(len) {
+  var ret = {}, str = '', cur;
+  for (var i = 0; i < a.length; ++i) {
+    str = a[i].message.toUpperCase();
+    for (var j = 0; j < str.length - len + 1; ++j) {
+      cur = str.substr(j, len);
+      ret[cur] = ret[cur] ? (ret[cur] + 1) : 1;
+    }
+  }
+  ret = count_user(ret, true);
+  for (var i in ret) ret[i] = ret[i].join(' ');
+  return ret;
+}
+count_words(这里自己随便填一个长度)
