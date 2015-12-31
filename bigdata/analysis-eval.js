@@ -79,3 +79,20 @@ prog_cnt_by_name
 for (var i in prog_cnt) { i = parseInt(i); prog_cnt_by_name[programmes[i].name] /= ((programmes[i + 1] ? programmes[i + 1].start : (14081 - replay_offset)) - programmes[i].start); }
 prog_cnt_by_name  // 弹幕密度
 count_user(prog_cnt_by_name, true)
+
+// 弹幕总字数（包括标点符号、空格）
+//for (var i = 0; i < a.length; ++i) if (a[i].message.length == undefined) console.log(a[i]);
+a.reduce(function (r, e) { return r + e.message.length; }, 0)
+// 统计单字
+single_char = {};
+var str = '', cur;
+for (var i = 0; i < a.length; ++i) {
+  str = a[i].message;
+  for (var j = 0; j < str.length; ++j) {
+    cur = str[j];
+    single_char[cur] = single_char[cur] ? (single_char[cur] + 1) : 1;
+  }
+}
+single_char = count_user(single_char, true)
+for (var i in single_char) single_char[i] = single_char[i].join('');
+single_char

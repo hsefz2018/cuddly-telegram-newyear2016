@@ -28,6 +28,7 @@ for (var i = 0; i < a.length; ++i) {
   a[i].send_time = date_parse(a[i].send_time);
   a[i].assign_time = date_parse(a[i].assign_time);
   a[i].check_time = date_parse(a[i].check_time);
+  a[i].message = a[i].message.toString(); // Pure-numeric messages ˊ_>ˋ
 }
 
 console.log(a.slice(657, 666));
