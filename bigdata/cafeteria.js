@@ -1,4 +1,4 @@
-var data;
+var data, a;
 
 var start_time = -3600;   // 17:00
 var end_time = 12600;     // 21:30
@@ -81,6 +81,14 @@ function preprocess(a) {
   }
 }
 
+function count_comments(d, fn, tag) {
+  if (!d.count_results) d.count_results = {};
+  if (d.count_results[tag] != undefined) return d.count_results[tag];
+  var ret = 0;
+  for (var i = 0; i < d.list.length; ++i) if (fn(d.list[i])) ++ret;
+  return (d.count_results[tag] = ret);
+}
+
 var margin = {vertical: 40, horizontal: 40};
 var width = window.innerWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
 
@@ -93,38 +101,60 @@ function visualize(data) {
   //document.write(JSON.stringify(data[666]));
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
-  y_scale.domain([0, d3.max(data, function (d) { return d.count; })]);
+  y_scale.domain([0, d3.max(data, function (d) { return d.list.length; })]);
   svg.append('g')
     .attr('transform', 'translate(0, ' + height + ')')
     .call(x_axis);
   svg.append('g')
     .call(y_axis);
-  svg.selectAll('.bar')
-      .data(data)
-    .enter().append('rect')
-      .attr('class', 'bar')
-      .attr('x', function (d) { return x_scale(d.bucket_start); })
-      .attr('width', x_scale.rangeBand() + 0.2)
-      .attr('y', function (d) { return y_scale(d.count); })
-      .attr('height', function (d) { return height - (y_scale(d.count)); });
+  var enter = svg.selectAll('.bar').data(data).enter();
+/*enter.append('rect')
+    .attr('class', 'bar')
+    .attr('x', function (d) { return x_scale(d.bucket_start); })
+    .attr('width', x_scale.rangeBand() + 0.2)
+    .attr('y', function (d) { return y_scale(d.list.length); })
+    .attr('height', function (d) { return height - (y_scale(d.list.length)); });*/
+  enter.append('rect')
+    .attr('class', 'bar')
+    .attr('style', 'fill: #ff5533')
+    .attr('x', function (d) { return x_scale(d.bucket_start); })
+    .attr('width', x_scale.rangeBand() + 0.2)
+    .attr('y', function (d) {
+      return y_scale(count_comments(d, function (i) {
+        //return d.filter(function (i) { return a[i].check_result === 1 || a[i].check_result === 3; }).length;
+        return a[i].check_result === 1 || a[i].check_result === 3;
+      }, 444));
+    })
+    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 444)); })
+  enter.append('rect')
+    .attr('class', 'bar')
+    .attr('style', 'fill: #3355ff')
+    .attr('x', function (d) { return x_scale(d.bucket_start); })
+    .attr('width', x_scale.rangeBand() + 0.2)
+    .attr('y', function (d) {
+      return y_scale(count_comments(d, undefined, 444) + count_comments(d, function (i) {
+        return a[i].check_result === 0 || a[i].check_result === 2;
+      }, 446));
+    })
+    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 446)); });
 }
 
 d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
   preprocess(json);
-  count = [];
+  a = json;
+  list = [];
   data = [];
   var bucket_size = 30;
   var min_bucket = Math.floor(start_time / bucket_size),
       max_bucket = Math.floor(end_time / bucket_size);
   for (var i = 0; i < json.length; ++i) {
     var bucket_id = Math.floor(json[i].send_time / bucket_size);
-    count[bucket_id] = (count[bucket_id] || 0) + 1;
-    // if (bucket_id < min_bucket) min_bucket = bucket_id;
-    // if (bucket_id > max_bucket) max_bucket = bucket_id;
+    if (list[bucket_id]) list[bucket_id].push(i);
+    else list[bucket_id] = [ i ];
   }
   for (var i = min_bucket; i <= max_bucket; ++i) {
-    data.push({bucket_start: i * bucket_size, count: count[i] || 0});
+    data.push({bucket_start: i * bucket_size, list: list[i] || []});
   }
   data.sort(function (a, b) { return a.bucket_start > b.bucket_start; });
   visualize(data);
