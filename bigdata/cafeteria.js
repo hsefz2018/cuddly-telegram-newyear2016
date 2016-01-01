@@ -90,7 +90,7 @@ function count_comments(d, fn, tag) {
 }
 
 var margin = {vertical: 40, horizontal: 40};
-var width = window.innerWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
+var width = document.body.clientWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
 
 var x_scale = d3.scale.ordinal().rangeBands([0, width], 0);
 var y_scale = d3.scale.linear().range([height, 0]);
@@ -148,6 +148,7 @@ function visualize(data, func, colour, tag) {
     .attr('height', function (d) { return height - y_scale(count_comments(d, func, tag)); });
 }
 
+/* https://github.com/hsefz2018/cuddly-telegram-newyear2016/raw/master/bigdata/ */
 d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
   preprocess(json);
@@ -165,7 +166,7 @@ d3.json('2016newyeardanmaku.json', function (err, json) {
   for (var i = min_bucket; i <= max_bucket; ++i) {
     data.push({bucket_start: i * bucket_size, list: list[i] || []});
   }
-  data.sort(function (a, b) { return a.bucket_start > b.bucket_start; });
+  data.sort(function (a, b) { return a.bucket_start > b.bucket_start ? 1 : -1; });
   visualize(data, function (i) { return 1; }, '#aaaa22', 222);
 });
 
