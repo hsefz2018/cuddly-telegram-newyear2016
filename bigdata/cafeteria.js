@@ -97,7 +97,7 @@ var y_scale = d3.scale.linear().range([height, 0]);
 var x_axis = d3.svg.axis().scale(x_scale).orient('bottom');//.ticks(d3.time.seconds, 30);
 var y_axis = d3.svg.axis().scale(y_scale).orient('left').ticks(10);
 
-function visualize(data) {
+function visualize(data, func, colour, tag) {
   //document.write(JSON.stringify(data[666]));
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
@@ -114,7 +114,7 @@ function visualize(data) {
     .attr('width', x_scale.rangeBand() + 0.2)
     .attr('y', function (d) { return y_scale(d.list.length); })
     .attr('height', function (d) { return height - (y_scale(d.list.length)); });*/
-  enter.append('rect')
+/*enter.append('rect')
     .attr('class', 'bar')
     .attr('style', 'fill: #ff5533')
     .attr('x', function (d) { return x_scale(d.bucket_start); })
@@ -136,7 +136,16 @@ function visualize(data) {
         return a[i].check_result === 0 || a[i].check_result === 2;
       }, 446));
     })
-    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 446)); });
+    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 446)); });*/
+  enter.append('rect')
+    .attr('class', 'bar')
+    .attr('style', 'fill: ' + colour)
+    .attr('x', function (d) { return x_scale(d.bucket_start); })
+    .attr('width', x_scale.rangeBand() + 0.2)
+    .attr('y', function (d) {
+      return y_scale(count_comments(d, func, tag));
+    })
+    .attr('height', function (d) { return height - y_scale(count_comments(d, func, tag)); });
 }
 
 d3.json('2016newyeardanmaku.json', function (err, json) {
@@ -157,7 +166,7 @@ d3.json('2016newyeardanmaku.json', function (err, json) {
     data.push({bucket_start: i * bucket_size, list: list[i] || []});
   }
   data.sort(function (a, b) { return a.bucket_start > b.bucket_start; });
-  visualize(data);
+  visualize(data, function (i) { return 1; }, '#aaaa22', 222);
 });
 
 var svg = d3.select('body').append('svg')
