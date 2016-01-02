@@ -183,10 +183,7 @@ visualize = function (data, groups, colours) {
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
   var domain_max = d3.max(data, function (d) { return d.values[0]; });
-  y_scale.domain([0, domain_max]);
-  y_axis.tickFormat(function (d) {
-    return options.disp_mode === 0 ? d.toString() : Math.round(100 * d / domain_max).toString() + '%';
-  });
+  y_scale.domain([0, options.disp_mode === 0 ? domain_max : 1]);
   svg.append('g')
     .attr('transform', 'translate(0, ' + height + ')')
     .call(x_axis);
@@ -202,14 +199,14 @@ visualize = function (data, groups, colours) {
       .attr('y', height)
       .attr('height', 0)
       .transition()
-        .delay(function (d) { return d.t_delay || (d.t_delay = Math.random() * 500); })
-        .duration(function (d) { return d.t_duration || (d.t_duration = Math.random() * 400 + 800); })
+        .delay(function (d) { return d.t_delay || (d.t_delay = Math.random() * 200); })
+        .duration(function (d) { return d.t_duration || (d.t_duration = Math.random() * 400 + 400); })
         .attr('y', function (d) {
           d.subtotal = (d.subtotal || 0) + (d.values[i] || 0);
-          return y_scale(d.subtotal * (options.disp_mode === 0 ? 1 : domain_max / d.values[0]));
+          return y_scale(d.subtotal * (options.disp_mode === 0 ? 1 : 1 / d.values[0]));
         })
         .attr('height', function (d) {
-          return height - y_scale((d.values[i] || 0) * (options.disp_mode === 0 ? 1 : domain_max / d.values[0]));
+          return height - y_scale((d.values[i] || 0) * (options.disp_mode === 0 ? 1 : 1 / d.values[0]));
         });
   }
 };
