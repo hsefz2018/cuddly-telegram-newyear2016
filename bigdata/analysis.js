@@ -1,5 +1,3 @@
-var fs = require('fs');
-
 var account_names = {'学生电视台': 0, '校友联络会': 1};
 var result_names = {'由审核员批准': 0, '由审核员拒绝': 1, '系统自动批准': 2, '系统自动拒绝': 3, '人工审核中': 4, '未审核': 5};
 var color_names = {'白色': 0, '红色': 1, '绿色': 2, '蓝色': 3};
@@ -16,8 +14,7 @@ var date_parse = function (d) {
     ((d.charCodeAt(17) - 48) * 10 + d.charCodeAt(18) - 48) - 64800;
 };
 
-var json_file = '2016newyeardanmaku.json';
-var a = JSON.parse(fs.readFileSync(json_file, { encoding: 'utf-8' }));
+var a = require('./2016newyeardanmaku.json');
 
 // XXX: a = a.map(function (e) { ... }) ?
 for (var i = 0; i < a.length; ++i) {
