@@ -84,28 +84,36 @@ function preprocess(a) {
 
 var visualize;
 
-var count = function () {
+var count_bargraph = function (categorizer, colours) {
   var data = [];
   var counter = [];
+  var max_group_id = 0;
   var bucket_size = 30;
   var min_bucket = Math.floor(start_time / bucket_size),
       max_bucket = Math.floor(end_time / bucket_size);
   for (var i = 0; i < a.length; ++i) {
     var bucket_id = Math.floor(a[i].send_time / bucket_size);
-    data[bucket_id] = (data[bucket_id] || 0) + 1;
+    var group_id = categorizer(a[i]);
+    if (max_group_id < group_id) max_group_id = group_id;
+    data[bucket_id] = data[bucket_id] || [ 0 ];
+    ++data[bucket_id][0];
+    data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
   }
   for (var i = min_bucket; i <= max_bucket; ++i) {
-    counter.push({bucket_start: i * bucket_size, value: data[i] || 0});
+    counter.push({bucket_start: i * bucket_size, values: data[i] || []});
   }
   counter.sort(function (a, b) { return a.bucket_start - b.bucket_start; });
-  visualize(counter);
+  visualize(counter, max_group_id, colours);
 };
 
 d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
   preprocess(json);
   a = json;
-  count();
+  count_bargraph(function (d) {
+    if (d.check_result === 1 || d.check_result === 3) return 1;
+    else return 2;
+  }, ['#ff6688', '#22ff44']);
 });
 
 var margin = {vertical: 40, horizontal: 40};
@@ -122,21 +130,23 @@ var svg = d3.select('body').append('svg')
   .append('g')
     .attr('transform', 'translate(' + margin.horizontal + ', ' + margin.horizontal + ')');
 
-visualize = function (data) {
+visualize = function (data, groups, colours) {
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
-  y_scale.domain([0, d3.max(data, function (d) { return d.value; })]);
+  y_scale.domain([0, d3.max(data, function (d) { return d.values[0]; })]);
   svg.append('g')
     .attr('transform', 'translate(0, ' + height + ')')
     .call(x_axis);
   svg.append('g')
     .call(y_axis);
   var enter = svg.selectAll('.bar').data(data).enter();
-  enter.append('rect')
-    .attr('class', 'bar')
-    //.attr('style', 'fill: ' + colour)
-    .attr('x', function (d) { return x_scale(d.bucket_start); })
-    .attr('width', x_scale.rangeBand() + 0.1)
-    .attr('y', function (d) { return y_scale(d.value); })
-    .attr('height', function (d) { return height - y_scale(d.value); });
+  for (var i = 1; i <= groups; ++i) {
+    enter.append('rect')
+      .attr('class', 'bar')
+      .attr('style', 'fill: ' + colours[i - 1])
+      .attr('x', function (d) { return x_scale(d.bucket_start); })
+      .attr('width', x_scale.rangeBand() + 0.1)
+      .attr('y', function (d) { d.subtotal = (d.subtotal || 0) + (d.values[i] || 0); return y_scale(d.subtotal); })
+      .attr('height', function (d) { return height - y_scale(d.values[i] || 0); });
+  }
 };
