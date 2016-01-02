@@ -20,15 +20,17 @@ var count_with_options = function () {
     // message.includes('蔡') and (result=manual_rejected or result=auto_rejected)
     // message.includes('蔡') and (result=manual_approved or result=auto_approved)
     expr[i] = expr[i]
-      .replace(/message/g, 'd.message')
-      .replace(/position/g, 'd.position')
-      .replace(/color/g, 'd.color')
-      .replace(/white/g, '0').replace(/red/g, '1').replace(/green/g, '2').replace(/blue/g, '3')
-      .replace(/result/g, 'd.check_result')
-      .replace(/manual_approved/g, '0').replace(/manual_rejected/g, '1')
-      .replace(/auto_approved/g, '2').replace(/auto_rejected/g, '3')
-      .replace(/=/g, '==')
-      .replace(/ and /g, '&&').replace(/ or /g, '||').replace(/ not /g, '!');
+      .replace(/\bmessage\b/g, 'd.message')
+      .replace(/\bposition\b/g, 'd.position')
+      .replace(/\bcolor\b/g, 'd.color')
+      .replace(/\bwhite\b/g, '0').replace(/\bred\b/g, '1').replace(/\bgreen\b/g, '2').replace(/\bblue\b/g, '3')
+      .replace(/\bresult\b/g, 'd.check_result')
+      .replace(/\bmanual_approved\b/g, '0').replace(/\bmanual_rejected\b/g, '1')
+      .replace(/\bauto_approved\b/g, '2').replace(/\bauto_rejected\b/g, '3')
+      .replace(/\b=\b/g, '==')
+      .replace(/\band\b/g, '&&').replace(/ or /g, '||').replace(/ not /g, '!')
+      .replace(/\bapproved\b/g, '(d.check_result == 0 || d.check_result == 2)')
+      .replace(/\brejected\b/g, '(d.check_result == 1 || d.check_result == 3)');
   }
   count_bargraph(function (d) {
     for (var i = 0; i < initial_colours.length; ++i) {
