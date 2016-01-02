@@ -6,10 +6,43 @@
     <script src='d3.min.js'></script>
     <style>
       .bar { fill: #1f77b4; }
-      body { margin: 9em; }
+      main { margin: 3em; }
+      .options-panel { margin: 1em; }
     </style>
+    <link rel='stylesheet' href='bootstrap.min.css'>
   </head>
   <body>
+    <nav class='navbar navbar-default navbar-static-top'>
+      <div class='container-fluid'>
+        <div class='navbar-header'>
+          <a class='navbar-brand' href='#'>2016年华东师大二附中元旦文艺汇演 · 数据开放平台</a>
+        </div>
+      </div>
+    </nav>
+    <main id='main'>
+      <ul class='nav nav-tabs'>
+        <li role='presentation' class='active'><a href='javascript:;'>弹幕数量</a></li>
+        <li role='presentation'><a href='javascript:;'>活跃用户</a></li>
+        <li role='presentation'><a href='javascript:;'>排行榜</a></li>
+      </ul>
+      <div class='options-panel' id='options-timing'>
+        <span>时间粒度：</span>
+        <div id='btn-tim-bucket' class='btn-group' role='group'>
+          <button id='btn-tim-15s' type='button' class='btn btn-default'>15秒</button>
+          <button id='btn-tim-30s' type='button' class='btn btn-default active'>30秒</button>
+          <button id='btn-tim-60s' type='button' class='btn btn-default'>60秒</button>
+          <button id='btn-tim-120s' type='button' class='btn btn-default'>120秒</button>
+          <button id='btn-tim-300s' type='button' class='btn btn-default'>300秒</button>
+        </div><br>
+        <span>显示：</span>
+        <div id='btn-tim-disp' class='btn-group' role='group'>
+          <button id='btn-tim-count' type='button' class='btn btn-default active'>数量</button>
+          <button id='btn-tim-percentage' type='button' class='btn btn-default'>比例</button>
+        </div>
+      </div>
+      <div class='options-panel' id='options-comments'>
+      </div>
+    </main>
     <script src='cafeteria.js'></script>
   </body>
 </html>

@@ -1,3 +1,44 @@
+var btngroup_click_handler = function (e) {
+  var bro = e.target.parentElement.children;
+  for (var i = 0; i < bro.length; ++i) bro[i].classList.remove('active');
+  e.target.classList.add('active');
+};
+var btngroup_click = function (f) {
+  return function (e) { f(); btngroup_click_handler(e); };
+};
+var options = {
+  bucket_size: 30,
+  disp_mode: 0,
+  comment: {  }
+};
+var count_with_options = function () {
+  count_bargraph(function (d) {
+    var b1 = d.message.includes('东山'), b2 = d.message.includes('蔡');
+    if (b1) return b2 ? 1 : 2;
+    else return b2 ? 3 : 4;
+  }, ['#2222aa', '#8888ff', '#66ccff', '#aaaaaa']);
+};
+var init_btn_tim_bucket = function (bucket) {
+  document.getElementById('btn-tim-' + bucket + 's').onclick = btngroup_click(function () {
+    options.bucket_size = bucket;
+    count_with_options();
+  });
+};
+init_btn_tim_bucket(15);
+init_btn_tim_bucket(30);
+init_btn_tim_bucket(60);
+init_btn_tim_bucket(120);
+init_btn_tim_bucket(300);
+document.getElementById('btn-tim-count').onclick = btngroup_click(function () {
+  options.disp_mode = 0;
+  count_with_options();
+});
+document.getElementById('btn-tim-percentage').onclick = btngroup_click(function () {
+  options.disp_mode = 1;
+  count_with_options();
+});
+
+
 var a;
 
 var start_time = -3600;   // 17:00
@@ -88,7 +129,7 @@ var count_bargraph = function (categorizer, colours) {
   var data = [];
   var counter = [];
   var max_group_id = 0;
-  var bucket_size = 30;
+  var bucket_size = options.bucket_size;
   var min_bucket = Math.floor(start_time / bucket_size),
       max_bucket = Math.floor(end_time / bucket_size);
   for (var i = 0; i < a.length; ++i) {
@@ -100,7 +141,7 @@ var count_bargraph = function (categorizer, colours) {
     data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
   }
   for (var i = min_bucket; i <= max_bucket; ++i) {
-    counter.push({bucket_start: i * bucket_size, values: data[i] || []});
+    counter.push({bucket_start: i * bucket_size, values: data[i] || [ 0 ]});
   }
   counter.sort(function (a, b) { return a.bucket_start - b.bucket_start; });
   visualize(counter, max_group_id, colours);
@@ -122,14 +163,14 @@ d3.json('2016newyeardanmaku.json', function (err, json) {
 });
 
 var margin = {vertical: 40, horizontal: 40};
-var width = document.body.clientWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
+var width = document.getElementById('main').clientWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
 
 var x_scale = d3.scale.ordinal().rangeBands([0, width], 0);
 var y_scale = d3.scale.linear().range([height, 0]);
 var x_axis = d3.svg.axis().scale(x_scale).orient('bottom');
 var y_axis = d3.svg.axis().scale(y_scale).orient('left').ticks(10);
 
-var svg = d3.select('body').append('svg')
+var svg = d3.select('main').append('svg')
     .attr('width', width + 2 * margin.horizontal)
     .attr('height', height + 2 * margin.vertical)
   .append('g')
@@ -137,10 +178,15 @@ var svg = d3.select('body').append('svg')
 
 visualize = function (data, groups, colours) {
   svg.selectAll('rect').remove();
+  svg.selectAll('g').remove();
 
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
-  y_scale.domain([0, d3.max(data, function (d) { return d.values[0]; })]);
+  var domain_max = d3.max(data, function (d) { return d.values[0]; });
+  y_scale.domain([0, domain_max]);
+  y_axis.tickFormat(function (d) {
+    return options.disp_mode === 0 ? d.toString() : Math.round(100 * d / domain_max).toString() + '%';
+  });
   svg.append('g')
     .attr('transform', 'translate(0, ' + height + ')')
     .call(x_axis);
@@ -152,13 +198,18 @@ visualize = function (data, groups, colours) {
       .attr('class', 'bar')
       .attr('style', 'fill: ' + colours[i - 1])
       .attr('x', function (d) { return x_scale(d.bucket_start); })
-      .attr('width', x_scale.rangeBand() + 0.1)
+      .attr('width', x_scale.rangeBand() + 0.15)
       .attr('y', height)
       .attr('height', 0)
       .transition()
         .delay(function (d) { return d.t_delay || (d.t_delay = Math.random() * 500); })
         .duration(function (d) { return d.t_duration || (d.t_duration = Math.random() * 400 + 800); })
-        .attr('y', function (d) { d.subtotal = (d.subtotal || 0) + (d.values[i] || 0); return y_scale(d.subtotal); })
-        .attr('height', function (d) { return height - y_scale(d.values[i] || 0); });
+        .attr('y', function (d) {
+          d.subtotal = (d.subtotal || 0) + (d.values[i] || 0);
+          return y_scale(d.subtotal * (options.disp_mode === 0 ? 1 : domain_max / d.values[0]));
+        })
+        .attr('height', function (d) {
+          return height - y_scale((d.values[i] || 0) * (options.disp_mode === 0 ? 1 : domain_max / d.values[0]));
+        });
   }
 };
