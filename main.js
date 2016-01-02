@@ -1,7 +1,8 @@
 (function (window) {
   var comment_type_names = {
     'top': window.commenting.type.TOP_SLIDE,
-    'bottom': window.commenting.type.BOTTOM_STICK
+    'bottom': window.commenting.type.BOTTOM_STICK,
+    'top-stick': window.commenting.type.TOP_STICK
   };
 
   var html_decode_helper = document.createElement('span');

@@ -132,14 +132,15 @@
     comment_add_bullet(id, message, color, positioning_data.top, this.width, cmt_w, cmt_h, -speed, duration);
     return true;
   };
-  var CommentBoardStick = function (width, height) {
+  var comment_board_stick_ctor = function () { return function (width, height) {
     this.width = width;
     this.height = height;
     this.next_clear = [];
     for (var i = 0; i <= Math.ceil(height_limit / comment_v_chunk_height); ++i) {
       this.next_clear[i] = 0;
     }
-  };
+  }; };
+  var CommentBoardStick = comment_board_stick_ctor();
   CommentBoardStick.prototype.fire = function (id, message, color) {
     var now = Date.now();
     // Measure size
@@ -175,19 +176,20 @@
     return true;
   };
   CommentBoardStick.prototype.y_for_line = function (num, cmt_h) { return 0; }; // Override me
-  var CommentBoardTopStick = CommentBoardStick;
-  CommentBoardTopStick.prototype.y_for_line = function (num, cmt_h) { return comment_v_chunk_height * num + padding_top; };
-  var CommentBoardBottomStick = CommentBoardStick;
+  var CommentBoardTopStick = comment_board_stick_ctor();
+  CommentBoardTopStick.prototype = new CommentBoardStick();
+  CommentBoardTopStick.prototype.y_for_line = function (num, cmt_h) {
+    return comment_v_chunk_height * num + padding_top;
+  };
+  var CommentBoardBottomStick = comment_board_stick_ctor();
+  CommentBoardBottomStick.prototype = new CommentBoardStick();
   CommentBoardBottomStick.prototype.y_for_line = function (num, cmt_h) {
     return window_h - comment_v_chunk_height * num - cmt_h - padding_bottom;
   };
 
-  var comment_board_cnt = 4;
   var comment_board_topslide = [];
+  var comment_board_topstick = [];
   var comment_board_bottomstick = [];
-  for (var i = 0; i < comment_board_cnt; ++i) {
-    comment_board_topslide[i] = new CommentBoardTopSlide(window_w, window_h);
-  }
   commenting.fire = function (c) {
     var i;
     var board_array, board_type;
@@ -195,6 +197,9 @@
     if (c.position === comment_types.TOP_SLIDE) {
       board_array = comment_board_topslide;
       board_type = CommentBoardTopSlide;
+    } else if (c.position === comment_types.TOP_STICK) {
+      board_array = comment_board_topstick;
+      board_type = CommentBoardTopStick;
     } else if (c.position === comment_types.BOTTOM_STICK) {
       board_array = comment_board_bottomstick;
       board_type = CommentBoardBottomStick;

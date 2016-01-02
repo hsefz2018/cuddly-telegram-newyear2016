@@ -20,7 +20,7 @@ Chrome：[Access-Control-Allow-Origin: *](https://chrome.google.com/webstore/det
 
 Firefox / Chrome / Safari 均工作正常，但同样存在同源策略问题……
 
-Position 可以选择 top 或者 bottom
+Position 可以选择 top、bottom 或者 top-stick（Admin 专用）
 
 两个按钮分别为“发送”和“随机选取一个颜色并发送”，在 Web Console 里可以看到所有发送的 HTTP 请求
 
