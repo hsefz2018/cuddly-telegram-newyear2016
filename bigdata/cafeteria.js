@@ -37,6 +37,50 @@ document.getElementById('btn-tim-percentage').onclick = btngroup_click(function 
   options.disp_mode = 1;
   count_with_options();
 });
+/*<div class='input-group'>
+  <span class='input-group-addon'1</span>
+  <input id='txt-group-1' type='text' class='form-control'>
+</div>*/
+var initial_colours = ['#dd7777', '#66dd88', '#66ccff', '#1f77b4', '#aaaaaa'];
+for (var i = 1; i <= initial_colours.length; ++i) {
+  var elm = document.createElement('div');
+  elm.classList.add('input-group');
+  var span = document.createElement('span');
+  span.classList.add('input-group-addon');
+  span.id = 'txt-group-label-' + i.toString();
+  span.innerText = i.toString();
+  span.style.backgroundColor = initial_colours[i - 1];
+  span.onclick = (function (_i) { return function () {
+    var input = document.getElementById('txt-group-colour-' + _i.toString());
+    input.jscolor.show();
+    // Clumsy workaround. Whatever -^-#
+    if (!input.jscolor.onFineChange)
+      input.jscolor.onFineChange = (function (_i) { return function () {
+        document.getElementById('txt-group-label-' + _i.toString()).style.backgroundColor = '#' + this.valueElement.value;
+      }; })(_i);
+  }; })(i);
+  elm.appendChild(span);
+  var input = document.createElement('input');
+  input.id = 'txt-group-cond-' + i.toString();
+  input.type = 'text';
+  input.classList.add('form-control');
+  elm.appendChild(input);
+  var input_jscolor = document.createElement('input');
+  input_jscolor.id = 'txt-group-colour-' + i.toString();
+  //input_jscolor.style.display = 'none';
+  input_jscolor.classList.add('jscolor');
+  input_jscolor.classList.add('input-hidden');
+  input_jscolor.value = initial_colours[i - 1];
+  /*input_jscolor.onchange = (function (_i) { return function (e) {
+    document.getElementById('txt-group-label-' + _i.toString()).style.backgroundColor = '#' + e.target.value;
+  }; })(i);*/
+  span.appendChild(input_jscolor);
+  document.getElementById('btn-grp-container').appendChild(elm);
+}
+
+document.getElementById('btn-cmt-start').onclick = function () {
+  count_with_options();
+};
 
 
 var a;

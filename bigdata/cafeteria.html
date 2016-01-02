@@ -5,9 +5,9 @@
     <title>弹幕数据统计</title>
     <script src='d3.min.js'></script>
     <style>
-      .bar { fill: #1f77b4; }
       main { margin: 3em; }
       .options-panel { margin: 1em; }
+      .jscolor.input-hidden { border: none; width: 0px; visibility: hidden; }
     </style>
     <link rel='stylesheet' href='bootstrap.min.css'>
   </head>
@@ -38,11 +38,16 @@
         <div id='btn-tim-disp' class='btn-group' role='group'>
           <button id='btn-tim-count' type='button' class='btn btn-default active'>数量</button>
           <button id='btn-tim-percentage' type='button' class='btn btn-default'>比例</button>
+        </div><br>
+        <span>分组：</span>
+        <div id='btn-grp-container'>
         </div>
       </div>
       <div class='options-panel' id='options-comments'>
+        <button id='btn-cmt-start' type='button' class='btn btn-primary'>走起 √</button>
       </div>
     </main>
     <script src='cafeteria.js'></script>
+    <script src='jscolor.min.js'></script>
   </body>
 </html>
