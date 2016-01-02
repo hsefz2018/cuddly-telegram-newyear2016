@@ -258,7 +258,7 @@ visualize = function (data, groups, colours) {
   svg.selectAll('g').remove();
 
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
-  x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
+  x_axis.tickFormat(function (d) { return (parseInt(d) % (width < 480 ? 2400 : 1200) === 0) ? rel_time(d) : ''; });
   var domain_max = d3.max(data, function (d) { return d.values[0]; });
   y_scale.domain([0, options.disp_mode === 0 ? domain_max : 1]);
   svg.append('g')
