@@ -10,12 +10,17 @@ Chrome：[Access-Control-Allow-Origin: *](https://chrome.google.com/webstore/det
 
 ![Screenshot](screenshot.png)
 
+主程序 `index.html`
+===================
+
+为防止服务器发抽，连续收到两条文字内容相同的消息时会忽略
+
 弹幕后台 `sender.html`
 =====================
 
 Firefox / Chrome / Safari 均工作正常，但同样存在同源策略问题……
 
-已经更新以符合当前服务器 API（2015/12/28 23:00 GMT +8）
+Position 可以选择 top 或者 bottom
 
 两个按钮分别为“发送”和“随机选取一个颜色并发送”，在 Web Console 里可以看到所有发送的 HTTP 请求
 

@@ -5,7 +5,7 @@
   var window_h = window.innerHeight;
   var padding_top = 20;
   var padding_bottom = 30;
-  var height_limit = window_h;//190;
+  var height_limit = window_h;
 
   var comment_canvas = document.getElementById('comment-canvas');
   comment_canvas.width = window_w;
@@ -212,7 +212,6 @@
   };
   commenting.resume = function () {
     comment_is_paused = false;
-    // comment_update_last_time = Date.now();
   };
   commenting.toggle_pause = function () {
     comment_is_paused = !comment_is_paused;
