@@ -63,7 +63,7 @@ document.getElementById('btn-tim-percentage').onclick = btngroup_click(function 
   <input id='txt-group-1' type='text' class='form-control'>
 </div>*/
 var initial_colours = ['#dd7777', '#66dd88', '#66ccff', '#1f77b4', '#aaaaaa'];
-for (var i = 1; i <= initial_colours.length; ++i) {
+var add_group_button = function (i) {
   var elm = document.createElement('div');
   elm.classList.add('input-group');
   var span = document.createElement('span');
@@ -93,12 +93,22 @@ for (var i = 1; i <= initial_colours.length; ++i) {
   input_jscolor.classList.add('jscolor');
   input_jscolor.classList.add('input-hidden');
   input_jscolor.value = initial_colours[i - 1];
+  if (!input_jscolor.jscolor) input_jscolor.jscolor = new jscolor(input_jscolor);
   /*input_jscolor.onchange = (function (_i) { return function (e) {
     document.getElementById('txt-group-label-' + _i.toString()).style.backgroundColor = '#' + e.target.value;
   }; })(i);*/
   span.appendChild(input_jscolor);
   document.getElementById('btn-grp-container').appendChild(elm);
 }
+for (var i = 1; i <= initial_colours.length; ++i) add_group_button(i);
+var rand_02x = function (x) {
+  var x = Math.floor(Math.random() * 256).toString(16);
+  return x.length < 2 ? '0' + x : x;
+};
+document.getElementById('btn-grp-add').onclick = function () {
+  initial_colours.push('#' + rand_02x() + rand_02x() + rand_02x());
+  add_group_button(initial_colours.length);
+};
 
 document.getElementById('btn-cmt-start').onclick = function () {
   count_with_options();
