@@ -280,10 +280,10 @@ visualize = function (data, groups, colours) {
         .duration(function (d) { return d.t_duration || (d.t_duration = Math.random() * 400 + 400); })
         .attr('y', function (d) {
           d.subtotal = (d.subtotal || 0) + (d.values[i] || 0);
-          return y_scale(d.subtotal * (options.disp_mode === 0 ? 1 : 1 / d.values[0]));
+          return y_scale(d.subtotal * (options.disp_mode === 0 ? 1 : 1 / (d.values[0] || 233)));
         })
         .attr('height', function (d) {
-          return height - y_scale((d.values[i] || 0) * (options.disp_mode === 0 ? 1 : 1 / d.values[0]));
+          return height - y_scale((d.values[i] || 0) * (options.disp_mode === 0 ? 1 : 1 / (d.values[0] || 233)));
         });
   }
 };
