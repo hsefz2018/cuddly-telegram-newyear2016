@@ -110,10 +110,15 @@ d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
   preprocess(json);
   a = json;
-  count_bargraph(function (d) {
+  /*count_bargraph(function (d) {
     if (d.check_result === 1 || d.check_result === 3) return 1;
     else return 2;
-  }, ['#ff6688', '#22ff44']);
+  }, ['#ff6688', '#22ff44']);*/
+  count_bargraph(function (d) {
+    var b1 = d.message.includes('东山'), b2 = d.message.includes('蔡');
+    if (b1) return b2 ? 1 : 2;
+    else return b2 ? 3 : 4;
+  }, ['#2222aa', '#8888ff', '#66ccff', '#aaaaaa']);
 });
 
 var margin = {vertical: 40, horizontal: 40};
@@ -131,6 +136,8 @@ var svg = d3.select('body').append('svg')
     .attr('transform', 'translate(' + margin.horizontal + ', ' + margin.horizontal + ')');
 
 visualize = function (data, groups, colours) {
+  svg.selectAll('rect').remove();
+
   x_scale.domain(data.map(function (d) { return d.bucket_start; }));
   x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
   y_scale.domain([0, d3.max(data, function (d) { return d.values[0]; })]);
@@ -146,7 +153,12 @@ visualize = function (data, groups, colours) {
       .attr('style', 'fill: ' + colours[i - 1])
       .attr('x', function (d) { return x_scale(d.bucket_start); })
       .attr('width', x_scale.rangeBand() + 0.1)
-      .attr('y', function (d) { d.subtotal = (d.subtotal || 0) + (d.values[i] || 0); return y_scale(d.subtotal); })
-      .attr('height', function (d) { return height - y_scale(d.values[i] || 0); });
+      .attr('y', height)
+      .attr('height', 0)
+      .transition()
+        .delay(function (d) { return d.t_delay || (d.t_delay = Math.random() * 500); })
+        .duration(function (d) { return d.t_duration || (d.t_duration = Math.random() * 400 + 800); })
+        .attr('y', function (d) { d.subtotal = (d.subtotal || 0) + (d.values[i] || 0); return y_scale(d.subtotal); })
+        .attr('height', function (d) { return height - y_scale(d.values[i] || 0); });
   }
 };
