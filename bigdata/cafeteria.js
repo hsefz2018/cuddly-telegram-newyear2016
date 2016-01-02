@@ -1,4 +1,4 @@
-var data, a;
+var a;
 
 var start_time = -3600;   // 17:00
 var end_time = 12600;     // 21:30
@@ -52,7 +52,7 @@ function rel_time(seconds, disp_seconds /* = false */) {
   seconds = seconds % 60;
   return hours + ':' + _02d(minutes) + (disp_seconds ? ':' + _02d(seconds) : '');
 }
-// 处理数据，把字符串表示的enum值和时间转换成数值方便处理
+// 把字符串表示的enum值和时间转换成数值方便处理
 function preprocess(a) {
   var account_names = {'学生电视台': 0, '校友联络会': 1};
   var result_names = {'由审核员批准': 0, '由审核员拒绝': 1, '系统自动批准': 2, '系统自动拒绝': 3, '人工审核中': 4, '未审核': 5};
@@ -74,104 +74,69 @@ function preprocess(a) {
     a[i].send_time = date_parse(a[i].send_time);
     a[i].assign_time = date_parse(a[i].assign_time);
     a[i].check_time = date_parse(a[i].check_time);
-    a[i].message = a[i].message.toString(); // Pure-numeric messages ˊ_>ˋ
+    a[i].message = a[i].message.toString();
     // 计算当时的节目
     var m = 0; while (m < programmes.length && programmes[m].start < a[i].send_time) ++m; --m;
     a[i].programme = m;
   }
 }
 
-function count_comments(d, fn, tag) {
-  if (!d.count_results) d.count_results = {};
-  if (d.count_results[tag] != undefined) return d.count_results[tag];
-  var ret = 0;
-  for (var i = 0; i < d.list.length; ++i) if (fn(d.list[i])) ++ret;
-  return (d.count_results[tag] = ret);
-}
+
+var visualize;
+
+var count = function () {
+  var data = [];
+  var counter = [];
+  var bucket_size = 30;
+  var min_bucket = Math.floor(start_time / bucket_size),
+      max_bucket = Math.floor(end_time / bucket_size);
+  for (var i = 0; i < a.length; ++i) {
+    var bucket_id = Math.floor(a[i].send_time / bucket_size);
+    data[bucket_id] = (data[bucket_id] || 0) + 1;
+  }
+  for (var i = min_bucket; i <= max_bucket; ++i) {
+    counter.push({bucket_start: i * bucket_size, value: data[i] || 0});
+  }
+  counter.sort(function (a, b) { return a.bucket_start - b.bucket_start; });
+  visualize(counter);
+};
+
+d3.json('2016newyeardanmaku.json', function (err, json) {
+  if (err) return console.log(err);
+  preprocess(json);
+  a = json;
+  count();
+});
 
 var margin = {vertical: 40, horizontal: 40};
 var width = document.body.clientWidth - 2 * margin.horizontal, height = 480 - 2 * margin.vertical;
 
 var x_scale = d3.scale.ordinal().rangeBands([0, width], 0);
 var y_scale = d3.scale.linear().range([height, 0]);
-var x_axis = d3.svg.axis().scale(x_scale).orient('bottom');//.ticks(d3.time.seconds, 30);
+var x_axis = d3.svg.axis().scale(x_scale).orient('bottom');
 var y_axis = d3.svg.axis().scale(y_scale).orient('left').ticks(10);
-
-function visualize(data, func, colour, tag) {
-  //document.write(JSON.stringify(data[666]));
-  x_scale.domain(data.map(function (d) { return d.bucket_start; }));
-  x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
-  y_scale.domain([0, d3.max(data, function (d) { return d.list.length; })]);
-  svg.append('g')
-    .attr('transform', 'translate(0, ' + height + ')')
-    .call(x_axis);
-  svg.append('g')
-    .call(y_axis);
-  var enter = svg.selectAll('.bar').data(data).enter();
-/*enter.append('rect')
-    .attr('class', 'bar')
-    .attr('x', function (d) { return x_scale(d.bucket_start); })
-    .attr('width', x_scale.rangeBand() + 0.2)
-    .attr('y', function (d) { return y_scale(d.list.length); })
-    .attr('height', function (d) { return height - (y_scale(d.list.length)); });*/
-/*enter.append('rect')
-    .attr('class', 'bar')
-    .attr('style', 'fill: #ff5533')
-    .attr('x', function (d) { return x_scale(d.bucket_start); })
-    .attr('width', x_scale.rangeBand() + 0.2)
-    .attr('y', function (d) {
-      return y_scale(count_comments(d, function (i) {
-        //return d.filter(function (i) { return a[i].check_result === 1 || a[i].check_result === 3; }).length;
-        return a[i].check_result === 1 || a[i].check_result === 3;
-      }, 444));
-    })
-    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 444)); })
-  enter.append('rect')
-    .attr('class', 'bar')
-    .attr('style', 'fill: #3355ff')
-    .attr('x', function (d) { return x_scale(d.bucket_start); })
-    .attr('width', x_scale.rangeBand() + 0.2)
-    .attr('y', function (d) {
-      return y_scale(count_comments(d, undefined, 444) + count_comments(d, function (i) {
-        return a[i].check_result === 0 || a[i].check_result === 2;
-      }, 446));
-    })
-    .attr('height', function (d) { return height - y_scale(count_comments(d, undefined, 446)); });*/
-  enter.append('rect')
-    .attr('class', 'bar')
-    .attr('style', 'fill: ' + colour)
-    .attr('x', function (d) { return x_scale(d.bucket_start); })
-    .attr('width', x_scale.rangeBand() + 0.2)
-    .attr('y', function (d) {
-      return y_scale(count_comments(d, func, tag));
-    })
-    .attr('height', function (d) { return height - y_scale(count_comments(d, func, tag)); });
-}
-
-/* https://github.com/hsefz2018/cuddly-telegram-newyear2016/raw/master/bigdata/ */
-d3.json('2016newyeardanmaku.json', function (err, json) {
-  if (err) return console.log(err);
-  preprocess(json);
-  a = json;
-  list = [];
-  data = [];
-  var bucket_size = 30;
-  var min_bucket = Math.floor(start_time / bucket_size),
-      max_bucket = Math.floor(end_time / bucket_size);
-  for (var i = 0; i < json.length; ++i) {
-    var bucket_id = Math.floor(json[i].send_time / bucket_size);
-    if (list[bucket_id]) list[bucket_id].push(i);
-    else list[bucket_id] = [ i ];
-  }
-  for (var i = min_bucket; i <= max_bucket; ++i) {
-    data.push({bucket_start: i * bucket_size, list: list[i] || []});
-  }
-  data.sort(function (a, b) { return a.bucket_start > b.bucket_start ? 1 : -1; });
-  visualize(data, function (i) { return 1; }, '#aaaa22', 222);
-});
 
 var svg = d3.select('body').append('svg')
     .attr('width', width + 2 * margin.horizontal)
     .attr('height', height + 2 * margin.vertical)
   .append('g')
     .attr('transform', 'translate(' + margin.horizontal + ', ' + margin.horizontal + ')');
+
+visualize = function (data) {
+  x_scale.domain(data.map(function (d) { return d.bucket_start; }));
+  x_axis.tickFormat(function (d) { return (parseInt(d) % 1200 === 0) ? rel_time(d) : ''; });
+  y_scale.domain([0, d3.max(data, function (d) { return d.value; })]);
+  svg.append('g')
+    .attr('transform', 'translate(0, ' + height + ')')
+    .call(x_axis);
+  svg.append('g')
+    .call(y_axis);
+  var enter = svg.selectAll('.bar').data(data).enter();
+  enter.append('rect')
+    .attr('class', 'bar')
+    //.attr('style', 'fill: ' + colour)
+    .attr('x', function (d) { return x_scale(d.bucket_start); })
+    .attr('width', x_scale.rangeBand() + 0.1)
+    .attr('y', function (d) { return y_scale(d.value); })
+    .attr('height', function (d) { return height - y_scale(d.value); });
+};
