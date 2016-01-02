@@ -12,11 +12,30 @@ var options = {
   comment: {  }
 };
 var count_with_options = function () {
+  var colours = [], expr = [];
+  for (var i = 0; i < initial_colours.length; ++i) {
+    colours[i] = '#' + document.getElementById('txt-group-colour-' + (i + 1).toString()).value;
+    expr[i] = document.getElementById('txt-group-cond-' + (i + 1).toString()).value;
+    // color=red and message.includes('蔡')
+    // message.includes('蔡') and (result=manual_rejected or result=auto_rejected)
+    // message.includes('蔡') and (result=manual_approved or result=auto_approved)
+    expr[i] = expr[i]
+      .replace(/message/g, 'd.message')
+      .replace(/position/g, 'd.position')
+      .replace(/color/g, 'd.color')
+      .replace(/white/g, '0').replace(/red/g, '1').replace(/green/g, '2').replace(/blue/g, '3')
+      .replace(/result/g, 'd.check_result')
+      .replace(/manual_approved/g, '0').replace(/manual_rejected/g, '1')
+      .replace(/auto_approved/g, '2').replace(/auto_rejected/g, '3')
+      .replace(/=/g, '==')
+      .replace(/ and /g, '&&').replace(/ or /g, '||').replace(/ not /g, '!');
+  }
   count_bargraph(function (d) {
-    var b1 = d.message.includes('东山'), b2 = d.message.includes('蔡');
-    if (b1) return b2 ? 1 : 2;
-    else return b2 ? 3 : 4;
-  }, ['#2222aa', '#8888ff', '#66ccff', '#aaaaaa']);
+    for (var i = 0; i < initial_colours.length; ++i) {
+      if (eval(expr[i])) return i + 1;
+    }
+    return -1;
+  }, colours);
 };
 var init_btn_tim_bucket = function (bucket) {
   document.getElementById('btn-tim-' + bucket + 's').onclick = btngroup_click(function () {
@@ -64,6 +83,7 @@ for (var i = 1; i <= initial_colours.length; ++i) {
   input.id = 'txt-group-cond-' + i.toString();
   input.type = 'text';
   input.classList.add('form-control');
+  input.onkeypress = function (e) { if (e.keyCode === 13) document.getElementById('btn-cmt-start').click(); };
   elm.appendChild(input);
   var input_jscolor = document.createElement('input');
   input_jscolor.id = 'txt-group-colour-' + i.toString();
@@ -179,6 +199,7 @@ var count_bargraph = function (categorizer, colours) {
   for (var i = 0; i < a.length; ++i) {
     var bucket_id = Math.floor(a[i].send_time / bucket_size);
     var group_id = categorizer(a[i]);
+    if (group_id === -1) continue;
     if (max_group_id < group_id) max_group_id = group_id;
     data[bucket_id] = data[bucket_id] || [ 0 ];
     ++data[bucket_id][0];
