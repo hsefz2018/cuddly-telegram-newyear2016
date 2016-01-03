@@ -11,27 +11,29 @@ var options = {
   disp_mode: 0,
   comment: {  }
 };
+String.prototype.count = function (s) { return this.split(s).length - 1 };
 var count_with_options = function () {
   var colours = [], expr = [];
   for (var i = 0; i < initial_colours.length; ++i) {
     colours[i] = '#' + document.getElementById('txt-group-colour-' + (i + 1).toString()).value;
     expr[i] = document.getElementById('txt-group-cond-' + (i + 1).toString()).value;
-    // color=red and message.includes('蔡')
-    // message.includes('蔡') and (result=manual_rejected or result=auto_rejected)
-    // message.includes('蔡') and (result=manual_approved or result=auto_approved)
     expr[i] = expr[i]
-      .replace(/\bmessage\b/g, 'd.message')
+      .replace(/\bcount\b/g, 'd.message.count')
+      .replace(/\bcontains\b/g, 'd.message.includes')
+      .replace(/\blength\b/g, 'd.message.length')
       .replace(/\bposition\b/g, 'd.position')
-      .replace(/\bcolor\b/g, 'd.color')
-      .replace(/\bwhite\b/g, '0').replace(/\bred\b/g, '1').replace(/\bgreen\b/g, '2').replace(/\bblue\b/g, '3')
-      .replace(/\bresult\b/g, 'd.check_result')
-      .replace(/\bmanual_approved\b/g, '0').replace(/\bmanual_rejected\b/g, '1')
-      .replace(/\bauto_approved\b/g, '2').replace(/\bauto_rejected\b/g, '3')
-      .replace(/\b=\b/g, '==')
-      .replace(/\band\b/g, '&&').replace(/ or /g, '||').replace(/ not /g, '!')
+      .replace(/\bwhite\b/g, '(d.color == 0)').replace(/\bred\b/g, '(d.color == 1)')
+      .replace(/\bgreen\b/g, '(d.color == 2)').replace(/\bblue\b/g, '(d.color == 3)')
+      .replace(/\bmanual_approved\b/g, '(d.check_result == 0)').replace(/\bmanual_rejected\b/g, '(d.check_result == 1)')
+      .replace(/\bauto_approved\b/g, '(d.check_result == 2)').replace(/\bauto_rejected\b/g, '(d.check_result == 3)')
+      .replace(/=/g, '==').replace(/>==/g, '>=').replace(/<==/g, '<=')
+      .replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!')
       .replace(/\bapproved\b/g, '(d.check_result == 0 || d.check_result == 2)')
-      .replace(/\brejected\b/g, '(d.check_result == 1 || d.check_result == 3)');
+      .replace(/\brejected\b/g, '(d.check_result == 1 || d.check_result == 3)')
+      .replace(/\bmanual_checked\b/g, '(d.check_result == 0 || d.check_result == 1)')
+      .replace(/\bauto_checked\b/g, '(d.check_result == 2 || d.check_result == 3)');
   }
+  if (expr.every(function (s) { return !s; })) expr[0] = '1';
   count_bargraph(function (d) {
     for (var i = 0; i < initial_colours.length; ++i) {
       if (eval(expr[i])) return i + 1;
@@ -228,15 +230,7 @@ d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
   preprocess(json);
   a = json;
-  /*count_bargraph(function (d) {
-    if (d.check_result === 1 || d.check_result === 3) return 1;
-    else return 2;
-  }, ['#ff6688', '#22ff44']);*/
-  count_bargraph(function (d) {
-    var b1 = d.message.includes('东山'), b2 = d.message.includes('蔡');
-    if (b1) return b2 ? 1 : 2;
-    else return b2 ? 3 : 4;
-  }, ['#2222aa', '#8888ff', '#66ccff', '#aaaaaa']);
+  document.getElementById('btn-cmt-start').click();
 });
 
 var margin = {vertical: 40, horizontal: 40};
