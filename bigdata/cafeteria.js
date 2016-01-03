@@ -18,22 +18,22 @@ var count_with_options = function () {
     colours[i] = '#' + document.getElementById('txt-group-colour-' + (i + 1).toString()).value;
     expr[i] = document.getElementById('txt-group-cond-' + (i + 1).toString()).value;
     expr[i] = expr[i]
+      .replace(/=/g, '==').replace(/>==/g, '>=').replace(/<==/g, '<=')
+      .replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!')
+      .replace(/\bother\b/g, '1')
       .replace(/\bcount\b/g, 'd.message.count')
       .replace(/\bcontains\b/g, 'd.message.includes')
       .replace(/\blength\b/g, 'd.message.length')
-      .replace(/\bposition\b/g, 'd.position')
+      .replace(/\btop\b/g, '(d.position == 0)').replace(/\bbottom\b/g, '(d.position == 1)')
       .replace(/\bwhite\b/g, '(d.color == 0)').replace(/\bred\b/g, '(d.color == 1)')
       .replace(/\bgreen\b/g, '(d.color == 2)').replace(/\bblue\b/g, '(d.color == 3)')
       .replace(/\bmanual_approved\b/g, '(d.check_result == 0)').replace(/\bmanual_rejected\b/g, '(d.check_result == 1)')
       .replace(/\bauto_approved\b/g, '(d.check_result == 2)').replace(/\bauto_rejected\b/g, '(d.check_result == 3)')
-      .replace(/=/g, '==').replace(/>==/g, '>=').replace(/<==/g, '<=')
-      .replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!')
       .replace(/\bapproved\b/g, '(d.check_result == 0 || d.check_result == 2)')
       .replace(/\brejected\b/g, '(d.check_result == 1 || d.check_result == 3)')
       .replace(/\bmanual_checked\b/g, '(d.check_result == 0 || d.check_result == 1)')
       .replace(/\bauto_checked\b/g, '(d.check_result == 2 || d.check_result == 3)');
   }
-  if (expr.every(function (s) { return !s; })) expr[0] = '1';
   count_bargraph(function (d) {
     for (var i = 0; i < initial_colours.length; ++i) {
       if (eval(expr[i])) return i + 1;
@@ -103,6 +103,7 @@ var add_group_button = function (i) {
   document.getElementById('btn-grp-container').appendChild(elm);
 }
 for (var i = 1; i <= initial_colours.length; ++i) add_group_button(i);
+document.getElementById('txt-group-cond-' + initial_colours.length).value = 'other';
 var rand_02x = function (x) {
   var x = Math.floor(Math.random() * 256).toString(16);
   return x.length < 2 ? '0' + x : x;
@@ -110,6 +111,18 @@ var rand_02x = function (x) {
 document.getElementById('btn-grp-add').onclick = function () {
   initial_colours.push('#' + rand_02x() + rand_02x() + rand_02x());
   add_group_button(initial_colours.length);
+};
+
+var tab_activate = function (idx) {
+  var panel_ids = [undefined, 'options-comments', 'options-users', 'options-ranklist'];
+  for (var i = 1; i <= 3; ++i) {
+    document.getElementById('tab-mode-' + i).classList.remove('active');
+    document.getElementById(panel_ids[i]).classList.add('all-hidden');
+  }
+  document.getElementById('tab-mode-' + idx).classList.add('active');
+  if (idx === 1 || idx === 2) document.getElementById('options-timing').classList.remove('all-hidden');
+  else document.getElementById('options-timing').classList.add('all-hidden');
+  document.getElementById(panel_ids[idx]).classList.remove('all-hidden');
 };
 
 document.getElementById('btn-cmt-start').onclick = function () {

@@ -13,6 +13,7 @@
         .options-panel { margin: 20px; }
       }
       .jscolor.input-hidden { border: none; width: 0px; visibility: hidden; }
+      .all-hidden { display: none; }
     </style>
     <link rel='stylesheet' href='bootstrap.min.css'>
   </head>
@@ -26,9 +27,9 @@
     </nav>
     <main id='main'>
       <ul class='nav nav-tabs'>
-        <li role='presentation' class='active'><a href='javascript:;'>弹幕数量</a></li>
-        <li role='presentation'><a href='javascript:;'>活跃用户</a></li>
-        <li role='presentation'><a href='javascript:;'>排行榜</a></li>
+        <li id='tab-mode-1' role='presentation' class='active'><a href='javascript:tab_activate(1);'>弹幕数量</a></li>
+        <li id='tab-mode-2' role='presentation'><a href='javascript:tab_activate(2);'>活跃用户</a></li>
+        <li id='tab-mode-3' role='presentation'><a href='javascript:tab_activate(3);'>排行榜</a></li>
       </ul>
       <div class='options-panel' id='options-timing'>
         <span>时间粒度：</span>
@@ -49,7 +50,25 @@
         <button id='btn-grp-add' type='button' class='btn btn-default'>增加分组</button>
       </div>
       <div class='options-panel' id='options-comments'>
+        <p class='text-muted'>
+          <strong>分组说明</strong><br>
+          例：统计含有“东山”并被批准的 含有至少 5 个字的 红色或者底部弹幕的数量<br>
+          <code>contains("东山") and approved and length &gt;= 5 and (red or bottom)</code><br>
+          例：统计含有不超过三个感叹号的弹幕数量，被拒绝显示为红色，被批准显示为绿色<br>
+          <code>count("！") &gt; 0 and count("！") &lt;= 3 and rejected</code><br>
+          <code>count("！") &gt; 0 and count("！") &lt;= 3 and approved</code><br><br>
+          可以使用的表达式有：正常的数学算式（可以包含括号）、“and”、“or”、“not”、<code>contains("东山")</code>、
+          <code>count("东山")</code>、<code>length</code>、<code>top/bottom</code>、
+          <code>white/red/green/blue</code>、<code>approved/rejected</code>。<br>
+          如果一条弹幕满足多个组别的条件，被算入排在最前面的组。<br>
+          在任意一处单独填写“other”可以包括所有不满足之前任何一个组别的条件的所有弹幕，同时忽略所有后面的组别。
+        </p>
         <button id='btn-cmt-start' type='button' class='btn btn-primary'>走起 √</button>
+      </div>
+      <div class='options-panel all-hidden' id='options-users'>
+        <button id='btn-usr-start' type='button' class='btn btn-primary'>走起 √</button>
+      </div>
+      <div class='options-panel all-hidden' id='options-ranklist'>
       </div>
     </main>
     <script src='jscolor.min.js'></script>
