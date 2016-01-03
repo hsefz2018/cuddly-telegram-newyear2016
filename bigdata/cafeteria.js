@@ -7,6 +7,7 @@ var btngroup_click = function (f) {
   return function (e) { f(); btngroup_click_handler(e); };
 };
 var options = {
+  count_target: 1,  // 1->弹幕数量，2->活跃用户
   bucket_size: 30,
   disp_mode: 0,
   comment: {  }
@@ -32,14 +33,17 @@ var count_with_options = function () {
       .replace(/\bapproved\b/g, '(d.check_result == 0 || d.check_result == 2)')
       .replace(/\brejected\b/g, '(d.check_result == 1 || d.check_result == 3)')
       .replace(/\bmanual_checked\b/g, '(d.check_result == 0 || d.check_result == 1)')
-      .replace(/\bauto_checked\b/g, '(d.check_result == 2 || d.check_result == 3)');
+      .replace(/\bauto_checked\b/g, '(d.check_result == 2 || d.check_result == 3)')
+      .replace(/\.d\.message\.count/g, '.count')
+      .replace(/\.d\.message\.length/g, '.length')
+      .replace(/\bwholetext\b/g, 'd.wholetext');
   }
-  count_bargraph(function (d) {
+  setTimeout(function () { count_bargraph(function (d) {
     for (var i = 0; i < initial_colours.length; ++i) {
       if (eval(expr[i])) return i + 1;
     }
     return -1;
-  }, colours);
+  }, colours); }, 50);
 };
 var init_btn_tim_bucket = function (bucket) {
   document.getElementById('btn-tim-' + bucket + 's').onclick = btngroup_click(function () {
@@ -103,6 +107,7 @@ var add_group_button = function (i) {
   document.getElementById('btn-grp-container').appendChild(elm);
 }
 for (var i = 1; i <= initial_colours.length; ++i) add_group_button(i);
+document.getElementById('txt-group-cond-2').value = 'approved';
 document.getElementById('txt-group-cond-' + initial_colours.length).value = 'other';
 var rand_02x = function (x) {
   var x = Math.floor(Math.random() * 256).toString(16);
@@ -123,14 +128,16 @@ var tab_activate = function (idx) {
   if (idx === 1 || idx === 2) document.getElementById('options-timing').classList.remove('all-hidden');
   else document.getElementById('options-timing').classList.add('all-hidden');
   document.getElementById(panel_ids[idx]).classList.remove('all-hidden');
+  options.count_target = idx;
 };
 
-document.getElementById('btn-cmt-start').onclick = function () {
+document.getElementById('btn-cmt-start').onclick =
+document.getElementById('btn-usr-start').onclick = function () {
   count_with_options();
 };
 
 
-var a;
+var a, users;
 
 var start_time = -3600;   // 17:00
 var end_time = 12600;     // 21:30
@@ -185,7 +192,7 @@ function rel_time(seconds, disp_seconds /* = false */) {
   return hours + ':' + _02d(minutes) + (disp_seconds ? ':' + _02d(seconds) : '');
 }
 // 把字符串表示的enum值和时间转换成数值方便处理
-function preprocess(a) {
+function preprocess(a, users) {
   var account_names = {'学生电视台': 0, '校友联络会': 1};
   var result_names = {'由审核员批准': 0, '由审核员拒绝': 1, '系统自动批准': 2, '系统自动拒绝': 3, '人工审核中': 4, '未审核': 5};
   var color_names = {'白色': 0, '红色': 1, '绿色': 2, '蓝色': 3};
@@ -211,6 +218,14 @@ function preprocess(a) {
     var m = 0; while (m < programmes.length && programmes[m].start < a[i].send_time) ++m; --m;
     a[i].programme = m;
   }
+
+  //users = [];
+  for (var i = 0; i < a.length; ++i) {
+    var t = users[a[i].user_identifier] || {list: [], wholetext: ''};
+    t.list.push(i);
+    t.wholetext += a[i].message;
+    users[a[i].user_identifier] = t;
+  }
 }
 
 
@@ -223,14 +238,32 @@ var count_bargraph = function (categorizer, colours) {
   var bucket_size = options.bucket_size;
   var min_bucket = Math.floor(start_time / bucket_size),
       max_bucket = Math.floor(end_time / bucket_size);
-  for (var i = 0; i < a.length; ++i) {
-    var bucket_id = Math.floor(a[i].send_time / bucket_size);
-    var group_id = categorizer(a[i]);
-    if (group_id === -1) continue;
-    if (max_group_id < group_id) max_group_id = group_id;
-    data[bucket_id] = data[bucket_id] || [ 0 ];
-    ++data[bucket_id][0];
-    data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
+  if (options.count_target === 1) {
+    for (var i = 0; i < a.length; ++i) {
+      var bucket_id = Math.floor(a[i].send_time / bucket_size);
+      var group_id = categorizer(a[i]);
+      if (group_id === -1) continue;
+      if (max_group_id < group_id) max_group_id = group_id;
+      data[bucket_id] = data[bucket_id] || [ 0 ];
+      ++data[bucket_id][0];
+      data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
+    }
+  } else if (options.count_target === 2) {
+    var counted_ids_in_bucket = [];
+    for (var i = 0; i < a.length; ++i) {
+      var bucket_id = Math.floor(a[i].send_time / bucket_size);
+      var t = counted_ids_in_bucket[bucket_id] || [];
+      if (t.indexOf(a[i].user_identifier) !== -1) continue;
+      t.push(a[i].user_identifier);
+      counted_ids_in_bucket[bucket_id] = t;
+      var group_id = categorizer(users[a[i].user_identifier]);
+      if (group_id === -1) continue;
+      //console.log(a[i].user_identifier);
+      if (max_group_id < group_id) max_group_id = group_id;
+      data[bucket_id] = data[bucket_id] || [ 0 ];
+      ++data[bucket_id][0];
+      data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
+    }
   }
   for (var i = min_bucket; i <= max_bucket; ++i) {
     counter.push({bucket_start: i * bucket_size, values: data[i] || [ 0 ]});
@@ -241,8 +274,8 @@ var count_bargraph = function (categorizer, colours) {
 
 d3.json('2016newyeardanmaku.json', function (err, json) {
   if (err) return console.log(err);
-  preprocess(json);
-  a = json;
+  a = json; users = [];
+  preprocess(a, users);
   document.getElementById('btn-cmt-start').click();
 });
 
