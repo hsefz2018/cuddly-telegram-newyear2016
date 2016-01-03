@@ -14,7 +14,7 @@ var options = {
 };
 String.prototype.count = function (s) { return this.split(s).length - 1 };
 var count_user_comments = function (user_info, fun) {
-  if (user_info.counted != undefined) return user_info.counted;
+  if (user_info.counted != undefined) { console.log(user_info); return user_info.counted; }
   var ret = 0;
   for (var i = 0; i < user_info.list.length; ++i) {
     if (fun(a[user_info.list[i]])) ++ret;
@@ -274,7 +274,7 @@ var count_bargraph = function (categorizer, colours) {
       data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
     }
   } else if (options.count_target === 2) {
-    for (var i = 0; i < users.length; ++i) users[i].counted = undefined;
+    for (var i in users) users[i].counted = undefined;
     var counted_ids_in_bucket = [];
     for (var i = 0; i < a.length; ++i) {
       var bucket_id = Math.floor(a[i].send_time / bucket_size);
