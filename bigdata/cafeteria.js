@@ -13,6 +13,13 @@ var options = {
   comment: {  }
 };
 String.prototype.count = function (s) { return this.split(s).length - 1 };
+var count_user_comments = function (user_info, fun) {
+  var ret = 0;
+  for (var i = 0; i < user_info.list.length; ++i) {
+    if (fun(a[user_info.list[i]])) ++ret;
+  }
+  return ret;
+};
 var count_with_options = function () {
   var colours = [], expr = [];
   for (var i = 0; i < initial_colours.length; ++i) {
@@ -36,7 +43,24 @@ var count_with_options = function () {
       .replace(/\bauto_checked\b/g, '(d.check_result == 2 || d.check_result == 3)')
       .replace(/\.d\.message\.count/g, '.count')
       .replace(/\.d\.message\.length/g, '.length')
-      .replace(/\bwholetext\b/g, 'd.wholetext');
+      .replace(/\bwholetext\b/g, 'd.wholetext')
+      //.replace(/\bsent(\b/g, 'count_user_comments(function (d) { return (')
+      .replace(/sent\(all\)/g, 'd.list.length');
+    var p, q, brackets;
+    while ((p = expr[i].indexOf('sent(')) !== -1) {
+      q = p;
+      p = p + 'sent('.length;
+      brackets = 1;
+      while (p < expr[i].length) {
+        if (expr[i][p] === '(') ++brackets;
+        else if (expr[i][p] === ')' && --brackets === 0) break;
+        ++p;
+      }
+      if (p < expr[i].length) {
+        expr[i] = expr[i].substr(0, q) + 'count_user_comments(d, function (d) { return (' +
+          expr[i].substr(q + 'sent('.length, p - q - 'sent('.length) + '); }' + expr[i].substr(p);
+      } else break;
+    }
   }
   setTimeout(function () { count_bargraph(function (d) {
     for (var i = 0; i < initial_colours.length; ++i) {
