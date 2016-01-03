@@ -13,16 +13,16 @@ var options = {
   comment: {  }
 };
 String.prototype.count = function (s) { return this.split(s).length - 1 };
-var count_user_comments = function (user_info, fun) {
-  if (user_info.counted != undefined) { console.log(user_info); return user_info.counted; }
+var count_user_comments = function (user_info, idx, fun) {
+  if (user_info.counted[idx] != undefined) return user_info.counted[idx];
   var ret = 0;
   for (var i = 0; i < user_info.list.length; ++i) {
     if (fun(a[user_info.list[i]])) ++ret;
   }
-  return (user_info.counted = ret);
+  return (user_info.counted[idx] = ret);
 };
 var count_with_options = function () {
-  var colours = [], expr = [];
+  var colours = [], expr = [], occurence = 0;
   for (var i = 0; i < initial_colours.length; ++i) {
     colours[i] = '#' + document.getElementById('txt-group-colour-' + (i + 1).toString()).value;
     expr[i] = document.getElementById('txt-group-cond-' + (i + 1).toString()).value;
@@ -58,9 +58,11 @@ var count_with_options = function () {
         ++p;
       }
       if (p < expr[i].length) {
-        expr[i] = expr[i].substr(0, q) + 'count_user_comments(d, function (d) { return (' +
+        expr[i] = expr[i].substr(0, q) + 'count_user_comments(d, ' + occurence + ', function (d) { return (' +
           expr[i].substr(q + 'sent('.length, p - q - 'sent('.length) + '); }' + expr[i].substr(p);
       } else break;
+      ++occurence;
+      //alert(expr[i]);
     }
   }
   setTimeout(function () { count_bargraph(function (d) {
@@ -274,7 +276,7 @@ var count_bargraph = function (categorizer, colours) {
       data[bucket_id][group_id] = (data[bucket_id][group_id] || 0) + 1;
     }
   } else if (options.count_target === 2) {
-    for (var i in users) users[i].counted = undefined;
+    for (var i in users) users[i].counted = [];
     var counted_ids_in_bucket = [];
     for (var i = 0; i < a.length; ++i) {
       var bucket_id = Math.floor(a[i].send_time / bucket_size);
