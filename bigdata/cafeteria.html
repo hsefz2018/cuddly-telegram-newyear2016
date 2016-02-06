@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'>
+    <title>弹幕数据统计</title>
+    <script src='d3.min.js'></script>
+    <style>
+      main { margin: 10px; }
+      .options-panel { margin: 0px; }
+      @media (min-width: 768px) {
+        main { margin: 30px; }
+        .options-panel { margin: 20px; }
+      }
+      .jscolor.input-hidden { border: none; width: 0px; visibility: hidden; }
+      .all-hidden { display: none; }
+    </style>
+    <link rel='stylesheet' href='bootstrap.min.css'>
+  </head>
+  <body>
+    <nav class='navbar navbar-default navbar-static-top'>
+      <div class='container-fluid'>
+        <div class='navbar-header'>
+          <a class='navbar-brand' href='#'>2016年华东师大二附中元旦文艺汇演 · 数据开放平台</a>
+        </div>
+      </div>
+    </nav>
+    <main id='main'>
+      <ul class='nav nav-tabs'>
+        <li id='tab-mode-1' role='presentation' class='active'><a href='javascript:tab_activate(1);'>弹幕数量</a></li>
+        <li id='tab-mode-2' role='presentation'><a href='javascript:tab_activate(2);'>活跃用户</a></li>
+        <li id='tab-mode-3' role='presentation'><a href='javascript:tab_activate(3);'>排行榜</a></li>
+      </ul>
+      <div class='options-panel' id='options-timing'>
+        <span>时间粒度：</span>
+        <div id='btn-tim-bucket' class='btn-group' role='group'>
+          <button id='btn-tim-15s' type='button' class='btn btn-default'>15秒</button>
+          <button id='btn-tim-30s' type='button' class='btn btn-default active'>30秒</button>
+          <button id='btn-tim-60s' type='button' class='btn btn-default'>60秒</button>
+          <button id='btn-tim-120s' type='button' class='btn btn-default'>120秒</button>
+          <button id='btn-tim-300s' type='button' class='btn btn-default'>300秒</button>
+        </div><br>
+        <span>显示：</span>
+        <div id='btn-tim-disp' class='btn-group' role='group'>
+          <button id='btn-tim-count' type='button' class='btn btn-default active'>数量</button>
+          <button id='btn-tim-percentage' type='button' class='btn btn-default'>比例</button>
+        </div><br>
+        <div id='btn-grp-container'>
+        </div>
+        <button id='btn-grp-add' type='button' class='btn btn-default'>增加分组</button>
+      </div>
+      <div class='options-panel' id='options-comments'>
+        <p id='p-cmt-explanation' class='text-muted' style='width: 50%; margin-left: 3.5em;'>
+          <strong>分组说明</strong>
+          <button type='button' class='close' aria-label='Close'
+            onclick='javascript:document.getElementById("p-cmt-explanation").style.display = "none";'>
+            <span aria-hidden='true'>&times;</span>
+          </button><br>
+          例：统计含有“东山”并被批准的 含有至少 5 个字的 红色或者底部弹幕的数量<br>
+          <code>contains('东山') and approved and length &gt;= 5 and (red or bottom)</code><br>
+          例：统计含有不超过三个感叹号的弹幕数量，被拒绝显示为红色，被批准显示为绿色<br>
+          <code>count('！') &gt; 0 and count('！') &lt;= 3 and rejected</code><br>
+          <code>count('！') &gt; 0 and count('！') &lt;= 3 and approved</code><br><br>
+          可以使用的表达式有：正常的数学算式（可以包含括号）、“and”、“or”、“not”、<code>contains('东山')</code>、
+          <code>count('东山')</code>、<code>length</code>、<code>top/bottom</code>、
+          <code>white/red/green/blue</code>、<code>approved/rejected</code>。<br>
+          如果一条弹幕满足多个组别的条件，被算入排在最前面的组。<br>
+          在任意一处单独填写“other”可以包括所有不满足之前任何一个组别的条件的所有弹幕，同时忽略所有后面的组别。
+        </p>
+        <button id='btn-cmt-start' type='button' class='btn btn-primary'>走起 √</button>
+      </div>
+      <div class='options-panel all-hidden' id='options-users'>
+        <p id='p-usr-explanation' class='text-muted' style='width: 50%; margin-left: 3.5em;'>
+          <strong>分组说明</strong>
+          <button type='button' class='close' aria-label='Close'
+            onclick='javascript:document.getElementById("p-usr-explanation").style.display = "none";'>
+            <span aria-hidden='true'>&times;</span>
+          </button><br>
+          例：统计 30 秒内的发送者中，全程发送了超过 10 条弹幕且通过率大于一半的人数<br>
+          <code>sent(all) &gt;= 10 and sent(approved)/sent(all) &gt;= 0.5</code><br>
+          例：统计 30 秒内的发送者中，全程发送了很多白色“帅”的人数<br>
+          <code>sent(contains("帅") and white) &gt;= 15</code><br>
+          例：找到沉默寡言者出现的高峰期<br>
+          <code>sent(all) &lt;= 3 or wholetext.length &lt;= 15</code><br>
+          例：找到全程发感叹号很多的童鞋出现的高峰期<br>
+          <code>wholetext.count("！") &gt;= 20</code><br><br>
+          用<code>sent(条件)</code>统计用户一共发送的满足条件的弹幕数量，
+          用<code>wholetext</code>取得用户发送的所有消息连接而成的长字符串。其余同弹幕数量的统计。<br>
+          （嗯但是没有人会知道这些用户是谁的……<strike>CGT台长除外</strike> 请大家放心食用）
+        </p>
+        <button id='btn-usr-start' type='button' class='btn btn-primary'>走起 √</button>
+      </div>
+      <div class='options-panel all-hidden' id='options-ranklist'>
+      </div>
+    </main>
+    <script src='jscolor.min.js'></script>
+    <script src='cafeteria.js'></script>
+  </body>
+</html>
