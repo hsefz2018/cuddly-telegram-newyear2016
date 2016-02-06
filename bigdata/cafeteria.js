@@ -30,6 +30,7 @@ var count_with_options = function () {
       .replace(/=/g, '==').replace(/>==/g, '>=').replace(/<==/g, '<=')
       .replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!')
       .replace(/\bother\b/g, '1')
+      .replace(/\btext\b/g, 'd.message')
       .replace(/\bcount\b/g, 'd.message.count')
       .replace(/\bcontains\b/g, 'd.message.includes')
       .replace(/\blength\b/g, 'd.message.length')
